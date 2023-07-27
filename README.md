@@ -8,7 +8,7 @@ Additionally, Authress local is great way to develop with Authress without needi
 
 <p align="center">
     <a href="https://crates.io/crates/authress-local" alt="Authress Local Container">
-        <img src="https://img.shields.io/badge/Container-authress/authress-local.svg">
+        <img src="https://img.shields.io/badge/Container-authress/authress--local-DC7100.svg">
     </a>
     <a href="https://github.com/Authress/authress-local/actions" alt="GitHub action status">
         <img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg">

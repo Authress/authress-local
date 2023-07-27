@@ -1,5 +1,5 @@
 # Displays in the badge in Readme.md
-name: Latest SDK Build
+name: Latest Container Build
 
 on:
   push:
