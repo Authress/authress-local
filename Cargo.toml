@@ -1,5 +1,8 @@
 [package]
 name = "authress_local"
+
+# Use the published binary or container instead
+publish = false
 version = "0.0.0"
 edition = "2021"
 description = "Authress Local - Authorization running directly on your local machine. Used to provide an Authress compatible API for local development."

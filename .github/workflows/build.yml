@@ -1,0 +1,40 @@
+# Displays in the badge in Readme.md
+name: Latest SDK Build
+
+on:
+  push:
+    branches:
+    - main
+    - 'release/**'
+  pull_request:
+    branches:
+    - main
+    - 'release/**'
+
+env: 
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: rustup update stable && rustup default stable
+      - run: cargo -V
+      - run: cargo build --release --verbose --frozen
+      - run: cargo test --verbose
+
+      - name: Create Github Release and Tag
+        if: github.repository_owner == 'Authress' && github.ref != 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          branchId="${GITHUB_REF/refs\/heads\/release\//}"
+          export VERSION="${branchId}.${GITHUB_RUN_NUMBER}"
+          sed -i "s/0.0.0/${VERSION}/g" ./Cargo.toml -i
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo Building version: ${{ env.VERSION }}
+          git tag $VERSION
+          git push origin $VERSION
+      
+      

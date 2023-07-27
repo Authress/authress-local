@@ -1,12 +1,14 @@
 //! Main library entry point for authress_local implementation.
 
+// This is the implementation for the service
+
 #![allow(unused_imports)]
 
 use async_trait::async_trait;
 use futures::{future, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use hyper::server::conn::Http;
 use hyper::service::Service;
-use log::info;
+use log::*;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::net::SocketAddr;
@@ -158,11 +160,10 @@ use authress_local::{
     GetUserRolesForResourceResponse,
     DeleteUserResponse,
     GetUserResponse,
-    GetUsersResponse,
+    GetUsersResponse, ApiError,
 };
 use authress_local::server::MakeService;
 use std::error::Error;
-use swagger::ApiError;
 
 #[async_trait]
 impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
@@ -175,7 +176,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_claim({:?}) - X-Span-ID: {:?}", claim_request, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create user invite
@@ -186,7 +187,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_invite({:?}) - X-Span-ID: {:?}", invite, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create access record
@@ -197,7 +198,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_record({:?}) - X-Span-ID: {:?}", access_record, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create access request
@@ -208,7 +209,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_request({:?}) - X-Span-ID: {:?}", access_request, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete invite
@@ -219,7 +220,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_invite(\"{}\") - X-Span-ID: {:?}", invite_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Deletes access record
@@ -230,7 +231,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_record(\"{}\") - X-Span-ID: {:?}", record_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Deletes access request
@@ -241,7 +242,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_request(\"{}\") - X-Span-ID: {:?}", request_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve access record
@@ -252,7 +253,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_record(\"{}\") - X-Span-ID: {:?}", record_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List access records
@@ -266,7 +267,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_records({:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, filter, status, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve access request
@@ -277,7 +278,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_request(\"{}\") - X-Span-ID: {:?}", request_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List access requests
@@ -290,7 +291,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_requests({:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, status, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Approve or deny access request
@@ -302,7 +303,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("respond_to_access_request(\"{}\", {:?}) - X-Span-ID: {:?}", request_id, access_request_response, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Accept invite
@@ -313,7 +314,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("respond_to_invite(\"{}\") - X-Span-ID: {:?}", invite_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update access record
@@ -326,7 +327,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_record(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}", record_id, access_record, if_unmodified_since, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Link external provider
@@ -337,7 +338,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delegate_authentication({:?}) - X-Span-ID: {:?}", identity_request, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve account information
@@ -348,7 +349,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_account(\"{}\") - X-Span-ID: {:?}", account_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List linked external providers
@@ -358,7 +359,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_account_identities() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List user Authress accounts
@@ -369,7 +370,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_accounts({:?}) - X-Span-ID: {:?}", earliest_cache_time, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Log user into third-party application
@@ -381,7 +382,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delegate_user_login(\"{}\", {:?}) - X-Span-ID: {:?}", application_id, user_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create SSO connection
@@ -392,7 +393,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_connection({:?}) - X-Span-ID: {:?}", connection, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete SSO connection
@@ -403,7 +404,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_connection(\"{}\") - X-Span-ID: {:?}", connection_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve SSO connection
@@ -414,7 +415,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_connection(\"{}\") - X-Span-ID: {:?}", connection_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve user connection credentials
@@ -426,7 +427,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_connection_credentials(\"{}\", {:?}) - X-Span-ID: {:?}", connection_id, user_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List SSO connections
@@ -436,7 +437,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_connections() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update SSO connection
@@ -448,7 +449,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_connection(\"{}\", {:?}) - X-Span-ID: {:?}", connection_id, connection, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create extension
@@ -459,7 +460,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_extension({:?}) - X-Span-ID: {:?}", extension, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete extension
@@ -470,7 +471,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_extension(\"{}\") - X-Span-ID: {:?}", extension_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve extension
@@ -481,7 +482,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_extension(\"{}\") - X-Span-ID: {:?}", extension_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List extensions
@@ -491,7 +492,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_extensions() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// OAuth Authorize
@@ -505,7 +506,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("login(\"{}\", \"{}\", \"{}\", {:?}) - X-Span-ID: {:?}", client_id, code_challenge, redirect_uri, code_challenge_method, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// OAuth Token
@@ -516,7 +517,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("request_token({:?}) - X-Span-ID: {:?}", o_auth_token_request, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update extension
@@ -528,7 +529,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_extension(\"{}\", {:?}) - X-Span-ID: {:?}", extension_id, extension, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create group
@@ -539,7 +540,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_group({:?}) - X-Span-ID: {:?}", group, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Deletes group
@@ -550,7 +551,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_group({:?}) - X-Span-ID: {:?}", group_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve group
@@ -561,7 +562,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_group({:?}) - X-Span-ID: {:?}", group_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List groups
@@ -574,7 +575,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_groups({:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, filter, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update a group
@@ -586,7 +587,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_group({:?}, {:?}) - X-Span-ID: {:?}", group_id, group, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve resource configuration
@@ -597,7 +598,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_permissioned_resource(\"{}\") - X-Span-ID: {:?}", resource_uri, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List all resource configurations
@@ -607,7 +608,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_permissioned_resources() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List users with resource access
@@ -620,7 +621,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_resource_users(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}", resource_uri, limit, cursor, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update resource configuration
@@ -632,7 +633,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_permissioned_resource(\"{}\", {:?}) - X-Span-ID: {:?}", resource_uri, permissioned_resource, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create role
@@ -643,7 +644,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_role({:?}) - X-Span-ID: {:?}", role, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Deletes role
@@ -654,7 +655,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_role(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve role
@@ -665,7 +666,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_role(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List roles
@@ -675,7 +676,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_roles() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update role
@@ -687,7 +688,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_role(\"{}\", {:?}) - X-Span-ID: {:?}", role_id, role, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create service client
@@ -698,7 +699,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_client({:?}) - X-Span-ID: {:?}", client, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete service client access key
@@ -710,7 +711,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_access_key(\"{}\", \"{}\") - X-Span-ID: {:?}", client_id, key_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete service client
@@ -721,7 +722,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_client(\"{}\") - X-Span-ID: {:?}", client_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve service client
@@ -732,7 +733,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_client(\"{}\") - X-Span-ID: {:?}", client_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List service clients
@@ -744,7 +745,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_clients({:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Generate service client access key
@@ -755,7 +756,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("request_access_key(\"{}\") - X-Span-ID: {:?}", client_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update service client
@@ -767,7 +768,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_client(\"{}\", {:?}) - X-Span-ID: {:?}", client_id, client, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create tenant
@@ -778,7 +779,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_tenant({:?}) - X-Span-ID: {:?}", tenant, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete tenant
@@ -789,7 +790,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_tenant(\"{}\") - X-Span-ID: {:?}", tenant_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve tenant
@@ -800,7 +801,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_tenant(\"{}\") - X-Span-ID: {:?}", tenant_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List tenants
@@ -810,7 +811,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_tenants() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update tenant
@@ -822,7 +823,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("update_tenant(\"{}\", {:?}) - X-Span-ID: {:?}", tenant_id, tenant, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Verify user authorization
@@ -835,7 +836,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("authorize_user({:?}, \"{}\", {:?}) - X-Span-ID: {:?}", user_id, resource_uri, permission, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Get user permissions for resource
@@ -847,7 +848,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_user_permissions_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List user resources
@@ -863,7 +864,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_user_resources({:?}, {:?}, {:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", user_id, resource_uri, collection_configuration, permissions, limit, cursor, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Get user roles for resource
@@ -875,7 +876,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_user_roles_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete a user
@@ -886,7 +887,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("delete_user({:?}) - X-Span-ID: {:?}", user_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve a user
@@ -897,7 +898,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_user({:?}) - X-Span-ID: {:?}", user_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List users
@@ -911,7 +912,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("get_users({:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, filter, tenant_id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
 }

@@ -1,14 +1,17 @@
+// This is the Router + Service Controller, which calls into the servers.rs implementation
+
+
 use futures::{future, future::BoxFuture, Stream, stream, future::FutureExt, stream::TryStreamExt};
 use hyper::{Request, Response, StatusCode, Body, HeaderMap};
 use hyper::header::{HeaderName, HeaderValue, CONTENT_TYPE};
-use log::warn;
+use log::*;
 #[allow(unused_imports)]
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::task::{Context, Poll};
-use swagger::{ApiError, BodyExt, Has, RequestParser, XSpanIdString};
+use swagger::{BodyExt, Has, RequestParser, XSpanIdString};
 pub use swagger::auth::Authorization;
 use swagger::auth::Scopes;
 use url::form_urlencoded;
@@ -85,8 +88,17 @@ use crate::{Api,
      GetUserRolesForResourceResponse,
      DeleteUserResponse,
      GetUserResponse,
-     GetUsersResponse
+     GetUsersResponse, ApiError
 };
+
+pub const IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING: &str = "
+************************************************************************************************************
+************************************************************************************************************
+
+Implementation not yet available. Please file a ticket at https://github.com/Authress/authress-local/issues.
+
+************************************************************************************************************
+************************************************************************************************************";
 
 mod paths {
     use lazy_static::lazy_static;
@@ -485,12 +497,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(409).expect("Unable to turn 409 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -583,12 +598,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -700,12 +718,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -802,12 +823,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(422).expect("Unable to turn 422 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -883,12 +907,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -958,12 +985,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1033,12 +1063,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1134,12 +1167,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1263,12 +1299,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1345,12 +1384,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1456,12 +1498,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1576,12 +1621,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1664,12 +1712,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1825,12 +1876,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(413).expect("Unable to turn 413 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -1916,12 +1970,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2000,12 +2057,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2054,12 +2114,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2125,12 +2188,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2222,12 +2288,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2314,12 +2383,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2395,12 +2467,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2477,12 +2552,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2574,12 +2652,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2628,12 +2709,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2748,12 +2832,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2846,12 +2933,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -2927,12 +3017,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3009,12 +3102,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3063,12 +3159,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3203,12 +3302,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3285,12 +3387,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3411,12 +3516,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3509,12 +3617,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3590,12 +3701,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3672,12 +3786,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3783,12 +3900,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3903,12 +4023,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -3987,12 +4110,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4037,12 +4163,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4150,12 +4279,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4263,12 +4395,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4361,12 +4496,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4442,12 +4580,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4524,12 +4665,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4578,12 +4722,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4698,12 +4845,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4792,12 +4942,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4888,12 +5041,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -4963,12 +5119,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5041,12 +5200,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5134,12 +5296,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5216,12 +5381,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5336,12 +5504,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5434,12 +5605,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5515,12 +5689,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5597,12 +5774,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5651,12 +5831,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5771,12 +5954,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5882,12 +6068,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -5975,12 +6164,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -6142,12 +6334,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -6235,12 +6430,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -6310,12 +6508,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -6392,12 +6593,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
@@ -6521,12 +6725,15 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
                                             },
-                                            Err(_) => {
-                                                // Application code returned an error. This should not happen, as the implementation should
-                                                // return a valid response.
+                                            Err(ApiError::NotImplementedError(_)) => {
+                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                            },
+                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                                            Err(ApiError::UnknownApiError(_)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
                                                 *response.body_mut() = Body::from("An internal error occurred");
-                                            },
+                                            }
                                         }
 
                                         Ok(response)
