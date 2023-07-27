@@ -1,0 +1,4313 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@authress.io
+    name: Authress Support
+  description: |-
+    <p>
+    <h2>Introduction</h2>
+    <p>Welcome to the Authress Authorization API.
+    <br>The Authress REST API provides the operations and resources necessary to create records, assign permissions, and verify any user in your platform.</p>
+    <p><ul>
+      <li>Manage multitenant platforms and create user tenants for SSO connections.</li>
+      <li>Create records to assign roles and resources to grant access for users.</li>
+      <li>Check user access control by calling the authorization API at the right time.</li>
+      <li>Configure service clients to securely access services in your platform.</li>
+    </ul></p>
+    <p>For more in-depth scenarios check out the <a href="https://authress.io/knowledge-base" target="_blank">Authress knowledge base</a>.</p>
+    </p>
+  title: Authress
+  version: v1
+servers:
+- url: /
+tags:
+- name: User Permissions
+- name: Users
+- name: Groups
+- name: Roles
+- name: Access Records
+- name: Service Clients
+- name: Resource Permissions
+- name: Accounts
+- name: Applications
+- name: Connections
+- name: Tenants
+- name: Extensions
+paths:
+  /v1/users:
+    get:
+      description: Returns a paginated user list for the account. The data returned
+        by this endpoint is highly variable based on the source OAuth provider. Avoid
+        depending on undocumented properties.
+      operationId: getUsers
+      parameters:
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          format: int32
+          maximum: 100
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - description: Filter to search users by. This is a case insensitive search
+          through every text field.
+        explode: true
+        in: query
+        name: filter
+        required: false
+        schema:
+          maxLength: 64
+          minLength: 0
+          nullable: true
+          type: string
+        style: form
+      - description: "Return only users that are part of the specified tenant. Users\
+          \ can only be part of one tenant, using this parameter will limit returned\
+          \ users that have logged into this tenant."
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/UserIdentityCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch users\
+            \ for the specified, but has other account permissions"
+      security:
+      - oauth2: []
+      summary: List users
+      tags:
+      - Users
+  /v1/users/{userId}:
+    delete:
+      description: "Removes the user, all access the user has been granted through\
+        \ Authress access records, and any related user data. This action is completed\
+        \ asynchronously."
+      operationId: deleteUser
+      parameters:
+      - description: The user identifier.
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserIdentity/properties/userId'
+        style: simple
+      responses:
+        "202":
+          description: Success. User will be deleted.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete users.
+        "404":
+          description: Not found. The user does not exist.
+      security:
+      - oauth2: []
+      summary: Delete a user
+      tags:
+      - Users
+    get:
+      description: Get the user data associated with a user. The data returned by
+        this endpoint is highly variable based on the source OAuth provider. Avoid
+        depending on undocumented properties.
+      operationId: getUser
+      parameters:
+      - description: The user identifier.
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/UserIdentity/properties/userId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/UserIdentity'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to get user data.
+        "404":
+          description: Not found. The user does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve a user
+      tags:
+      - Users
+  /v1/users/{userId}/resources/{resourceUri}/permissions/{permission}:
+    get:
+      description: Performs the user authorization check. Does the user have the specified
+        permission to the resource?
+      operationId: authorizeUser
+      parameters:
+      - description: The user to check permissions on
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/User/properties/userId'
+        style: simple
+      - description: "The uri path of a resource to validate, must be URL encoded,\
+          \ uri segments are allowed, the resource must be a full path."
+        explode: false
+        in: path
+        name: resourceUri
+        required: true
+        schema:
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: simple
+      - description: "Permission to check, '*' and scoped permissions can also be\
+          \ checked here."
+        explode: false
+        in: path
+        name: permission
+        required: true
+        schema:
+          $ref: '#/components/schemas/PermissionObject/properties/action'
+        style: simple
+      responses:
+        "200":
+          description: Success. The user has permissions
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The requestor of the authorization check doesn't
+            have the required permission to check the user's authorization.
+        "404":
+          description: Not found. The user doesn't have any permissions to the resource
+            including the one requested.
+      security:
+      - oauth2: []
+      summary: Verify user authorization
+      tags:
+      - User Permissions
+  /v1/users/{userId}/resources/{resourceUri}/permissions:
+    get:
+      description: Get a summary of the permissions a user has to a particular resource.
+      operationId: getUserPermissionsForResource
+      parameters:
+      - description: The user to check permissions on
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/User/properties/userId'
+        style: simple
+      - description: "The uri path of a resource to validate, must be URL encoded,\
+          \ uri segments are allowed."
+        explode: false
+        in: path
+        name: resourceUri
+        required: true
+        schema:
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/PermissionCollection'
+          description: Success. The user has permissions
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "404":
+          description: Not found. The user doesn't have any permissions to the resource.
+      security:
+      - oauth2: []
+      summary: Get user permissions for resource
+      tags:
+      - User Permissions
+  /v1/users/{userId}/resources/{resourceUri}/roles:
+    get:
+      description: "Get a summary of the roles a user has to a particular resource.\
+        \ Users can be assigned roles from multiple access records, this may cause\
+        \ the same role to appear in the list more than once."
+      operationId: getUserRolesForResource
+      parameters:
+      - description: The user to get roles for.
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/User/properties/userId'
+        style: simple
+      - description: "The uri path of a resource to get roles for, must be URL encoded.\
+          \ Checks for explicit resource roles, roles attached to parent resources\
+          \ are not returned."
+        explode: false
+        in: path
+        name: resourceUri
+        required: true
+        schema:
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/UserRoleCollection'
+          description: Success. The user has roles
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "404":
+          description: Not found. The user doesn't have any permissions to the resource.
+      security:
+      - oauth2: []
+      summary: Get user roles for resource
+      tags:
+      - User Permissions
+  /v1/users/{userId}/resources:
+    get:
+      description: "Get the users resources. This result is a list of resource uris\
+        \ that a user has an permission to. By default only the top level matching\
+        \ resources are returned. To get a user's list of deeply nested resources,\
+        \ set the `collectionConfiguration` to be `INCLUDE_NESTED`. This collection\
+        \ is paginated."
+      operationId: getUserResources
+      parameters:
+      - description: The user to check permissions on
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/User/properties/userId'
+        style: simple
+      - description: The top level uri path of a resource to query for. Will only
+          match explicit or nested sub-resources. Will not partial match resource
+          names.
+        explode: true
+        in: query
+        name: resourceUri
+        required: false
+        schema:
+          example: /organizations
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: form
+      - description: "`TOP_LEVEL_ONLY` - returns only directly nested resources under\
+          \ the resourceUri. A query to `resourceUri=Collection` will return `Collection/resource_1`.<br>`INCLUDE_NESTED`\
+          \ - will return all sub-resources as well as deeply nested resources that\
+          \ the user has the specified permission to. A query to `resourceUri=Collection`\
+          \ will return `Collection/namespaces/ns/resources/resource_1`.<br><br>To\
+          \ return matching resources for nested resources, set this parameter to\
+          \ `INCLUDE_NESTED`."
+        explode: true
+        in: query
+        name: collectionConfiguration
+        required: false
+        schema:
+          default: TOP_LEVEL_ONLY
+          enum:
+          - TOP_LEVEL_ONLY
+          - INCLUDE_NESTED
+          nullable: true
+          type: string
+        style: form
+      - description: "Permission to check, '*' and scoped permissions can also be\
+          \ checked here. By default if the user has any permission explicitly to\
+          \ a resource, it will be included in the list."
+        explode: true
+        in: query
+        name: permissions
+        required: false
+        schema:
+          $ref: '#/components/schemas/PermissionObject/properties/action'
+        style: form
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/UserResources'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+      security:
+      - oauth2: []
+      summary: List user resources
+      tags:
+      - User Permissions
+  /v1/groups:
+    get:
+      description: "Returns a paginated groups list for the account. Only groups the\
+        \ user has access to are returned. This query resource is meant for administrative\
+        \ actions only, therefore has a lower rate limit tier than user permissions\
+        \ related resources."
+      operationId: getGroups
+      parameters:
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - description: Filter to search groups by. This is a case insensitive search
+          through every text field.
+        explode: true
+        in: query
+        name: filter
+        required: false
+        schema:
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/GroupCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch groups,\
+            \ but has other account permissions"
+      security:
+      - oauth2: []
+      summary: List groups
+      tags:
+      - Groups
+    post:
+      description: Specify users to be included in a new group. (Groups have a maximum
+        size of ~100KB)
+      operationId: createGroup
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/Group'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: Success. Group created
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create groups.
+      security:
+      - oauth2: []
+      summary: Create group
+      tags:
+      - Groups
+  /v1/groups/{groupId}:
+    delete:
+      description: "Remove a group, users will lose any role that was assigned through\
+        \ membership of this group. This action cannot be undone."
+      operationId: deleteGroup
+      parameters:
+      - description: The identifier of the group.
+        explode: false
+        in: path
+        name: groupId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Group/properties/groupId'
+        style: simple
+      responses:
+        "204":
+          description: Success. The group has been deleted
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete the group.
+        "404":
+          description: Not found. The user doesn't have any permissions to the resource
+            or the group no longer exists.
+      security:
+      - oauth2: []
+      summary: Deletes group
+      tags:
+      - Groups
+    get:
+      description: "A group contains multiple users which can be added to an access\
+        \ record, and should be assigned the same roles at the same time."
+      operationId: getGroup
+      parameters:
+      - description: The identifier of the group.
+        explode: false
+        in: path
+        name: groupId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Group/properties/groupId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the group,\
+            \ but they have other permissions to the same account."
+        "404":
+          description: Not found. The user doesn't have any permissions to the group
+            or this group does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve group
+      tags:
+      - Groups
+    put:
+      description: Updates a group adding or removing user. Change a group updates
+        the permissions and roles the users have access to. (Groups have a maximum
+        size of ~100KB)
+      operationId: updateGroup
+      parameters:
+      - description: The identifier of the group.
+        explode: false
+        in: path
+        name: groupId
+        required: true
+        schema:
+          $ref: '#/components/schemas/Group/properties/groupId'
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Group'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: Success. Group updated.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update the group.
+        "404":
+          description: Not found. The user doesn't have any permissions to the group.
+      security:
+      - oauth2: []
+      summary: Update a group
+      tags:
+      - Groups
+  /v1/resources:
+    get:
+      description: Permissions can be set globally at a resource level. Lists any
+        resources with a globally set resource policy.
+      operationId: getPermissionedResources
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/PermissionedResourceCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+      security:
+      - oauth2: []
+      summary: List all resource configurations
+      tags:
+      - Resource Permissions
+  /v1/resources/{resourceUri}:
+    get:
+      description: Permissions can be set globally at a resource level. This will
+        apply to all users in an account.
+      operationId: getPermissionedResource
+      parameters:
+      - description: "The uri path of a resource to validate, must be URL encoded,\
+          \ uri segments are allowed."
+        explode: false
+        in: path
+        name: resourceUri
+        required: true
+        schema:
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/PermissionedResource'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "404":
+          description: Not found. The user doesn't have permission to the resource.
+      security:
+      - oauth2: []
+      summary: Retrieve resource configuration
+      tags:
+      - Resource Permissions
+    put:
+      description: Updates the global permissions on a resource. This applies to all
+        users in an account.
+      operationId: updatePermissionedResource
+      parameters:
+      - description: "The uri path of a resource to validate, must be URL encoded,\
+          \ uri segments are allowed."
+        explode: false
+        in: path
+        name: resourceUri
+        required: true
+        schema:
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/PermissionedResource'
+      responses:
+        "200":
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the resource,\
+            \ but they have other permissions to the same resource."
+        "404":
+          description: Not found. The user doesn't have permission to the resource.
+      security:
+      - oauth2: []
+      summary: Update resource configuration
+      tags:
+      - Resource Permissions
+  /v1/resources/{resourceUri}/users:
+    get:
+      description: "Get the resource users with explicit access to the resource. This\
+        \ result is a list of users that have some permission to the resource. Users\
+        \ with access to parent resources and users with access only to a sub-resource\
+        \ will not be returned in this result. In the case that the resource has multiple\
+        \ users, the list will be paginated."
+      operationId: getResourceUsers
+      parameters:
+      - description: "The uri path of a resource to validate, must be URL encoded,\
+          \ uri segments are allowed."
+        explode: false
+        in: path
+        name: resourceUri
+        required: true
+        schema:
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+        style: simple
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ResourceUsersCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+      security:
+      - oauth2: []
+      summary: List users with resource access
+      tags:
+      - Resource Permissions
+  /v1/records:
+    get:
+      description: "Returns a paginated records list for the account. Only records\
+        \ the user has access to are returned. This query resource is meant for administrative\
+        \ actions only, therefore has a lower rate limit tier than user permissions\
+        \ related resources. Additionally, the results from a query to Access Records\
+        \ may be delayed up to 5 minutes."
+      operationId: getRecords
+      parameters:
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - description: Filter to search records by. This is a case insensitive search
+          through every text field.
+        explode: true
+        in: query
+        name: filter
+        required: false
+        schema:
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          type: string
+        style: form
+      - description: Filter records by their current status.
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - ACTIVE
+          - DELETED
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRecordCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch account\
+            \ records, but has other account permissions."
+      security:
+      - oauth2: []
+      summary: List access records
+      tags:
+      - Access Records
+    post:
+      description: Specify user roles for specific resources. (Records have a maximum
+        size of ~100KB)
+      operationId: createRecord
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/AccessRecord'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRecord'
+          description: Success. Access record created
+          headers:
+            Last-Modified:
+              description: The expected last time the record was modified. (<a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1"
+                target="_blank">format</a>)
+              explode: false
+              schema:
+                type: string
+              style: simple
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create records.
+      security:
+      - oauth2: []
+      summary: Create access record
+      tags:
+      - Access Records
+  /v1/records/{recordId}:
+    delete:
+      description: "Remove an access record, removing associated permissions from\
+        \ all users in record. If a user has a permission from another record, that\
+        \ permission will not be removed. (Note: This disables the record by changing\
+        \ the status to <strong>DELETED</strong> but not completely remove the record\
+        \ for tracking purposes."
+      operationId: deleteRecord
+      parameters:
+      - description: The identifier of the access record.
+        explode: false
+        in: path
+        name: recordId
+        required: true
+        schema:
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. The access record has been deleted
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete the access
+            record.
+        "404":
+          description: Not found. The user doesn't have any permissions to the resource
+            or the access record no longer exists.
+      security:
+      - oauth2: []
+      summary: Deletes access record
+      tags:
+      - Access Records
+    get:
+      description: Access records contain information assigning permissions to users
+        for resources.
+      operationId: getRecord
+      parameters:
+      - description: The identifier of the access record.
+        explode: false
+        in: path
+        name: recordId
+        required: true
+        schema:
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRecord'
+          description: Success.
+          headers:
+            Last-Modified:
+              description: The expected last time the record was modified. (<a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1"
+                target="_blank">format</a>)
+              explode: false
+              schema:
+                type: string
+              style: simple
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the access\
+            \ record, but they have other permissions to the same account."
+        "404":
+          description: Not found. The user doesn't have any permissions to the access
+            record or this access record does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve access record
+      tags:
+      - Access Records
+    put:
+      description: Updates an access record adding or removing user permissions to
+        resources. (Records have a maximum size of ~100KB)
+      operationId: updateRecord
+      parameters:
+      - description: The identifier of the access record.
+        explode: false
+        in: path
+        name: recordId
+        required: true
+        schema:
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        style: simple
+      - description: The expected last time the record was modified. (<a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1"
+          target="_blank">format</a>)
+        example: "Sun, 23 Jul 2023 13:29:35 GMT"
+        explode: false
+        in: header
+        name: If-Unmodified-Since
+        required: false
+        schema:
+          maxLength: 32
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/AccessRecord'
+      responses:
+        "202":
+          description: Success. Access record update request was accepted.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update the access
+            record.
+        "404":
+          description: Not found. The user doesn't have any permissions to the access
+            record.
+        "412":
+          description: Precondition failed. Usually the result of a concurrent update
+            to the access record. Get the latest version and retry again.
+          headers:
+            Last-Modified:
+              description: The expected last time the record was modified. (<a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1"
+                target="_blank">format</a>)
+              explode: false
+              schema:
+                type: string
+              style: simple
+        "413":
+          description: The size of the record is larger than allowed. Recommended
+            action is to create another record and retry the updates.
+      security:
+      - oauth2: []
+      summary: Update access record
+      tags:
+      - Access Records
+  /v1/invites:
+    post:
+      description: |-
+        Invites are used to easily assign permissions to users that have not been created in your identity provider yet.
+        1. This generates an invite record.
+        2. Send the invite ID to the user.
+        3. Log the user in.
+        4. As the user PATCH the /invite/{inviteId} endpoint
+        5. This accepts the invite.
+                When the user accepts the invite they will automatically receive the permissions assigned in the Invite. Invites automatically expire after 7 days.
+      operationId: createInvite
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/Invite'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Invite'
+          description: Success. Invite created
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have the permissions to create
+            an invite. They may have specified too many permissions in the invite.
+      security:
+      - oauth2: []
+      summary: Create user invite
+      tags:
+      - Access Records
+  /v1/invites/{inviteId}:
+    delete:
+      description: Deletes an invite.
+      operationId: deleteInvite
+      parameters:
+      - description: The identifier of the invite.
+        explode: false
+        in: path
+        name: inviteId
+        required: true
+        schema:
+          maxLength: 256
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. Invite deleted.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete the invite.
+        "404":
+          description: Not found. The user doesn't have any permissions to the invite.
+      security:
+      - oauth2: []
+      summary: Delete invite
+      tags:
+      - Access Records
+    patch:
+      description: Accepts an invite by claiming this invite by this user. The user
+        access token used for this request will gain the permissions associated with
+        the invite.
+      operationId: respondToInvite
+      parameters:
+      - description: The identifier of the invite.
+        explode: false
+        in: path
+        name: inviteId
+        required: true
+        schema:
+          maxLength: 256
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: Success. Invite accepted.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update the access
+            record.
+        "404":
+          description: Not found. The user doesn't have any permissions to the access
+            record.
+      security:
+      - oauth2: []
+      summary: Accept invite
+      tags:
+      - Access Records
+  /v1/requests:
+    get:
+      description: "Returns a paginated request list. Only requests the user has access\
+        \ to are returned. This query resource is meant for administrative actions\
+        \ only, therefore has a lower rate limit tier than user permissions related\
+        \ resources."
+      operationId: getRequests
+      parameters:
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - description: Filter requests by their current status.
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - OPEN
+          - APPROVED
+          - DENIED
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRequestCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch access\
+            \ requests, but has other account permissions."
+      security:
+      - oauth2: []
+      summary: List access requests
+      tags:
+      - Access Records
+    post:
+      description: Specify a request in the form of an access record that an admin
+        can approve.
+      operationId: createRequest
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/AccessRequest'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRequest'
+          description: Success. Access request created
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create access
+            requests.
+        "422":
+          description: Unprocessable Entity. Some of the data in the request is invalid.
+      security:
+      - oauth2: []
+      summary: Create access request
+      tags:
+      - Access Records
+  /v1/requests/{requestId}:
+    delete:
+      description: Remove an access request.
+      operationId: deleteRequest
+      parameters:
+      - description: The identifier of the access request.
+        explode: false
+        in: path
+        name: requestId
+        required: true
+        schema:
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. The access request has been deleted
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete the access
+            request.
+        "404":
+          description: Not found. The user doesn't have any permissions to the access
+            request or it no longer exists.
+      security:
+      - oauth2: []
+      summary: Deletes access request
+      tags:
+      - Access Records
+    get:
+      description: Access request contain information requesting permissions for users
+        to resources.
+      operationId: getRequest
+      parameters:
+      - description: The identifier of the access request.
+        explode: false
+        in: path
+        name: requestId
+        required: true
+        schema:
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRequest'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the access\
+            \ request, but they have other permissions to the same account."
+        "404":
+          description: Not found. The user doesn't have any permissions to the access
+            request or this access request does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve access request
+      tags:
+      - Access Records
+    patch:
+      description: "Updates an access request, approving it or denying it."
+      operationId: respondToAccessRequest
+      parameters:
+      - description: The identifier of the access request.
+        explode: false
+        in: path
+        name: requestId
+        required: true
+        schema:
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/AccessRequestResponse'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccessRequest'
+          description: Success. Access record updated.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update the access
+            request.
+        "404":
+          description: Not found. The user doesn't have any permissions to the access
+            request.
+      security:
+      - oauth2: []
+      summary: Approve or deny access request
+      tags:
+      - Access Records
+  /v1/roles:
+    get:
+      description: Get all the account roles. Roles contain a list of permissions
+        that will be applied to any user or resource
+      operationId: getRoles
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/RoleCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to account roles,\
+            \ but they have other permissions to the same account."
+      security:
+      - oauth2: []
+      summary: List roles
+      tags:
+      - Roles
+    post:
+      description: Creates a role with permissions.
+      operationId: createRole
+      requestBody:
+        $ref: '#/components/requestBodies/Role'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: Success. Role created.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the role, but\
+            \ they have other permissions to the same account."
+      security:
+      - oauth2: []
+      summary: Create role
+      tags:
+      - Roles
+  /v1/roles/{roleId}:
+    delete:
+      description: "Remove a role. If a record references the role, that record will\
+        \ not be modified."
+      operationId: deleteRole
+      parameters:
+      - description: The identifier of the role.
+        explode: false
+        in: path
+        name: roleId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-._:@]+$"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. The role has been deleted
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete the role.
+        "404":
+          description: Not found. The user doesn't have any permissions to the resource
+            or the role no longer exists.
+      security:
+      - oauth2: []
+      summary: Deletes role
+      tags:
+      - Roles
+    get:
+      description: Roles contain a list of permissions that will be applied to any
+        user or resource
+      operationId: getRole
+      parameters:
+      - description: The identifier of the role.
+        explode: false
+        in: path
+        name: roleId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-._:@]+$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the role, but\
+            \ they have other permissions to the same account."
+        "404":
+          description: Not found. The user doesn't have any permissions to the role
+            or this role does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve role
+      tags:
+      - Roles
+    put:
+      description: Updates a role adding or removing permissions.
+      operationId: updateRole
+      parameters:
+      - description: The identifier of the role.
+        explode: false
+        in: path
+        name: roleId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-._:@]+$"
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Role'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: Success. Role updated.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the role, but\
+            \ they have other permissions to the same account."
+        "404":
+          description: Not found. The user doesn't have any permissions to the role
+            or this role does not exist.
+      security:
+      - oauth2: []
+      summary: Update role
+      tags:
+      - Roles
+  /v1/claims:
+    post:
+      description: Claim a resource by allowing a user to pick an identifier and receive
+        admin access to that resource if it hasn't already been claimed. This only
+        works for resources specifically marked as <strong>CLAIM</strong>. The result
+        will be a new access record listing that user as the admin for this resource.
+        The resourceUri will be appended to the collection resource uri using a `/`
+        (forward slash) automatically.
+      operationId: createClaim
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/ClaimRequest'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ClaimResponse'
+          description: Success. Resource claimed.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to the resource
+            collection to claim a sub-resource.
+        "409":
+          description: AlreadyClaimed. The resource has already been claimed by another
+            user or another user already has access to this resource. So admin access
+            will not be given. The reason for this is to prevent preemptive stealing
+            of admin access to these records.
+      security:
+      - oauth2: []
+      summary: Create resource Claim
+      tags:
+      - Access Records
+  /v1/accounts:
+    get:
+      description: Returns a list of accounts that the user has access to.
+      operationId: getAccounts
+      parameters:
+      - description: Ensure the accounts list is not cached before this time.
+        explode: true
+        in: query
+        name: earliestCacheTime
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/AccountCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+      security:
+      - oauth2: []
+      summary: List user Authress accounts
+      tags:
+      - Accounts
+  /v1/accounts/{accountId}:
+    get:
+      description: Includes the original configuration information.
+      operationId: getAccount
+      parameters:
+      - description: The unique identifier for the account
+        explode: false
+        in: path
+        name: accountId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: Success. The account
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "404":
+          description: Not found. The user doesn't have any permissions to this account
+            or it does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve account information
+      tags:
+      - Accounts
+  /v1/identities:
+    get:
+      description: Returns a list of identities linked for this account.
+      operationId: getAccountIdentities
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/IdentityCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Not found. The user doesn't have permission to list identities
+            for this account.
+      security:
+      - oauth2: []
+      summary: List linked external providers
+      tags:
+      - Accounts
+    post:
+      description: An identity is a JWT subscriber *sub* and issuer *iss*. Only one
+        account my be linked to a particular JWT combination. Allows calling the API
+        with a federated token directly instead of using a client access key.
+      operationId: delegateAuthentication
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/IdentityRequest'
+      responses:
+        "201":
+          description: Success. New identity linked.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update identities
+            for the account.
+      security:
+      - oauth2: []
+      summary: Link external provider
+      tags:
+      - Accounts
+  /v1/clients:
+    get:
+      description: Returns all clients that the user has access to in the account.
+      operationId: getClients
+      parameters:
+      - description: Max number of results to return
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          format: int32
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Continuation cursor for paging.
+        explode: true
+        in: query
+        name: cursor
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ClientCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to the resource,\
+            \ but they have other permissions to the same resource."
+      security:
+      - oauth2: []
+      summary: List service clients
+      tags:
+      - Service Clients
+    post:
+      description: "Creates a service client to interact with Authress or any other\
+        \ service on behalf of users. Each client has secret private keys used to\
+        \ authenticate with Authress. To use service clients created through other\
+        \ mechanisms, skip creating a client and create access records with the client\
+        \ identifier."
+      operationId: createClient
+      requestBody:
+        $ref: '#/components/requestBodies/Client'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+      security:
+      - oauth2: []
+      summary: Create service client
+      tags:
+      - Service Clients
+  /v1/clients/{clientId}:
+    delete:
+      description: This deletes the service client.
+      operationId: deleteClient
+      parameters:
+      - description: The unique identifier for the client.
+        explode: false
+        in: path
+        name: clientId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. The client was deleted.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete the client.
+        "404":
+          description: Not found. The user doesn't have any permission to the client
+            or the client does not exist
+      security:
+      - oauth2: []
+      summary: Delete service client
+      tags:
+      - Service Clients
+    get:
+      description: Returns all information related to client except for the private
+        access keys.
+      operationId: getClient
+      parameters:
+      - description: The unique identifier for the client.
+        explode: false
+        in: path
+        name: clientId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "404":
+          description: Not found. The user doesn't have permissions to the client
+            or the client does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve service client
+      tags:
+      - Service Clients
+    put:
+      description: Updates a client information.
+      operationId: updateClient
+      parameters:
+      - description: The unique identifier for the client.
+        explode: false
+        in: path
+        name: clientId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Client'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Client'
+          description: Success. The client was updated
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update the client.
+        "404":
+          description: Not found. The user doesn't have permission to the account
+            or the client does not exist.
+      security:
+      - oauth2: []
+      summary: Update service client
+      tags:
+      - Service Clients
+  /v1/clients/{clientId}/access-keys:
+    post:
+      description: Create a new access key for the client so that a service can authenticate
+        with Authress as that client. Using the client will allow delegation of permission
+        checking of users. (Limited to 5 Active keys per client)
+      operationId: requestAccessKey
+      parameters:
+      - description: The unique identifier of the client.
+        explode: false
+        in: path
+        name: clientId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ClientAccessKey'
+          description: Success
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create access
+            keys for the client.
+        "404":
+          description: Not found. The user doesn't have any permissions to client
+            or the client does not exist.
+      security:
+      - oauth2: []
+      summary: Generate service client access key
+      tags:
+      - Service Clients
+  /v1/clients/{clientId}/access-keys/{keyId}:
+    delete:
+      description: Deletes an access key for a client prevent it from being used to
+        authenticate with Authress.
+      operationId: deleteAccessKey
+      parameters:
+      - description: The unique identifier of the client.
+        explode: false
+        in: path
+        name: clientId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      - description: The ID of the access key to remove from the client.
+        explode: false
+        in: path
+        name: keyId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. The access key has been deleted.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete access
+            keys from a client.
+        "404":
+          description: Not found. The user doesn't have any permissions to the client
+            or the client does not exist.
+      security:
+      - oauth2: []
+      summary: Delete service client access key
+      tags:
+      - Service Clients
+  /v1/connections:
+    get:
+      description: Returns a paginated connection list for the account. Only connections
+        the user has access to are returned.
+      operationId: getConnections
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ConnectionCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch account\
+            \ connections, but has other account permissions."
+      security:
+      - oauth2: []
+      summary: List SSO connections
+      tags:
+      - Connections
+    post:
+      description: Specify identity connection details for Authress identity aggregation.
+      operationId: createConnection
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/Connection'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Connection'
+          description: Success. Connection created
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create connection.
+      security:
+      - oauth2: []
+      summary: Create SSO connection
+      tags:
+      - Connections
+  /v1/connections/{connectionId}:
+    delete:
+      description: Delete an identity connection details for Authress identity aggregation.
+      operationId: deleteConnection
+      parameters:
+      - description: The connection identifier.
+        explode: false
+        in: path
+        name: connectionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. Connection deleted
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete connection.
+        "404":
+          description: Not found. The connection does not exist.
+      security:
+      - oauth2: []
+      summary: Delete SSO connection
+      tags:
+      - Connections
+    get:
+      description: Get the identity connection details for Authress identity aggregation.
+      operationId: getConnection
+      parameters:
+      - description: The connection identifier.
+        explode: false
+        in: path
+        name: connectionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Connection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to get connection.
+        "404":
+          description: Not found. The connection does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve SSO connection
+      tags:
+      - Connections
+    put:
+      description: Specify identity connection details for Authress identity aggregation.
+      operationId: updateConnection
+      parameters:
+      - description: The connection identifier.
+        explode: false
+        in: path
+        name: connectionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Connection'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Connection'
+          description: Success. Connection updated
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update connection.
+        "404":
+          description: Not found. The connection does not exist.
+      security:
+      - oauth2: []
+      summary: Update SSO connection
+      tags:
+      - Connections
+  /v1/connections/{connectionId}/users/{userId}/credentials:
+    get:
+      description: "Get the credentials for the user that were generated as part of\
+        \ the latest user login flow. Returns an access token that can be used with\
+        \ originating connection provider, based on the original scopes and approved\
+        \ permissions by that service."
+      operationId: getConnectionCredentials
+      parameters:
+      - description: The connection identifier.
+        explode: false
+        in: path
+        name: connectionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      - description: The connection user.
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/User/properties/userId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/UserConnectionCredentials'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to get user connection
+            credentials.
+        "404":
+          description: Not found. The connection or user does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve user connection credentials
+      tags:
+      - Connections
+  /v1/applications/{applicationId}/users/{userId}/delegation:
+    post:
+      description: Redirect the user to an external application to login them in.
+        Authress uses OpenID and SAML configuration to securely pass the user's login
+        session in your platform to an external platform. The user will then be logged
+        into that platform.
+      operationId: delegateUserLogin
+      parameters:
+      - description: The application to have the user log into.
+        explode: false
+        in: path
+        name: applicationId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      - description: The user.
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          $ref: '#/components/schemas/User/properties/userId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ApplicationDelegation'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to log a user into
+            this application.
+        "404":
+          description: Not found. The application or user does not exist.
+      security:
+      - oauth2: []
+      summary: Log user into third-party application
+      tags:
+      - Applications
+  /v1/tenants:
+    get:
+      description: Returns a paginated tenants list for the account. Only tenants
+        the user has access to are returned.
+      operationId: getTenants
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/TenantCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch account\
+            \ tenants, but has other account permissions."
+      security:
+      - oauth2: []
+      summary: List tenants
+      tags:
+      - Tenants
+    post:
+      description: "Specify tenant identity details for tenant tracking, separation,\
+        \ and user management. Tenant identifiers are persisted to access tokens created\
+        \ by Authress."
+      operationId: createTenant
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/Tenant'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Success. Tenant created
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create tenants.
+      security:
+      - oauth2: []
+      summary: Create tenant
+      tags:
+      - Tenants
+  /v1/tenants/{tenantId}:
+    delete:
+      description: Delete a tenant. If a connection was created for the tenant then
+        it is deleted as well.
+      operationId: deleteTenant
+      parameters:
+      - description: The tenantId.
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          maxLength: 128
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. Tenant deleted
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete tenant.
+        "404":
+          description: Not found. The tenant does not exist.
+      security:
+      - oauth2: []
+      summary: Delete tenant
+      tags:
+      - Tenants
+    get:
+      description: Get the tenant details for an Authress tenant.
+      operationId: getTenant
+      parameters:
+      - description: The tenantId.
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          maxLength: 128
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to get the tenant.
+        "404":
+          description: Not found. The tenant does not exist.
+      security:
+      - oauth2: []
+      summary: Retrieve tenant
+      tags:
+      - Tenants
+    put:
+      description: Updates the tenants information and linked tenant if it exists.
+      operationId: updateTenant
+      parameters:
+      - description: The tenantId.
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          maxLength: 128
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Tenant'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Success. Tenant updated
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update tenant.
+        "404":
+          description: Not found. The tenant does not exist.
+      security:
+      - oauth2: []
+      summary: Update tenant
+      tags:
+      - Tenants
+  /v1/extensions:
+    get:
+      description: Lists the platform extensions. Extensions are the applications
+        that developers of your platform have created for your users to interact with.
+        Returns a paginated extension list for the account. Only extensions the user
+        has access to are returned.
+      operationId: getExtensions
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/ExtensionCollection'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: "Forbidden. The user doesn't have permission to fetch account\
+            \ extensions, but has other account permissions."
+      security:
+      - oauth2: []
+      summary: List extensions
+      tags:
+      - Extensions
+    post:
+      description: Specify the extension details for a new developer extension. Creating
+        the extension enables developers to build applications that can log in to
+        your platform and interact with your users' data.
+      operationId: createExtension
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/Extension'
+      responses:
+        "201":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+          description: Success. Extension created
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to create extension.
+      security:
+      - oauth2: []
+      summary: Create extension
+      tags:
+      - Extensions
+  /v1/extensions/{extensionId}:
+    delete:
+      description: "Deletes the specified extension. When deleted an extension can\
+        \ no longer be accessed. Additionally users cannot use that extension to log\
+        \ in, nor can the service client associated with the extension be used to\
+        \ access data secured by Authress. The related Access Records will automatically\
+        \ be deleted."
+      operationId: deleteExtension
+      parameters:
+      - description: The extension identifier.
+        explode: false
+        in: path
+        name: extensionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Success. Extension deleted. Completed disabling and deleting
+            an extension is done asynchronously.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to delete extension.
+        "404":
+          description: Not found. The extension does not exist.
+      security:
+      - oauth2: []
+      summary: Delete extension
+      tags:
+      - Extensions
+    get:
+      description: Gets the platform extension details for the existing extension.
+      operationId: getExtension
+      parameters:
+      - description: The extension identifier.
+        explode: false
+        in: path
+        name: extensionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+          description: Success.
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to get extension.
+        "404":
+          description: Not found. The extension does not extension.
+      security:
+      - oauth2: []
+      summary: Retrieve extension
+      tags:
+      - Extensions
+    put:
+      description: Specify the updated extension. The extension will be updated and
+        these changes will be reflected to the access control and user authentication
+        associated with the extension.
+      operationId: updateExtension
+      parameters:
+      - description: The extension identifier.
+        explode: false
+        in: path
+        name: extensionId
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 1
+          type: string
+        style: simple
+      requestBody:
+        $ref: '#/components/requestBodies/Extension'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+          description: Success. The extension has been successfully updated
+        "401":
+          description: Unauthorized. The request JWT found in the Authorization header
+            is no longer valid.
+        "403":
+          description: Forbidden. The user doesn't have permission to update extension.
+        "404":
+          description: Not found. The extension does not exist.
+      security:
+      - oauth2: []
+      summary: Update extension
+      tags:
+      - Extensions
+  /:
+    get:
+      description: "*Note*: This endpoint is only to be used for [Authress Platform\
+        \ Extensions](https://authress.io/knowledge-base/docs/extensions/). If you\
+        \ are not building an app marketplace, then tokens can be directly requested\
+        \ for Service Clients, using the relevant [SDK](https://authress.io/app/#/api).<br><br>Start\
+        \ the OAuth login by redirecting the user to the OAuth Authorize endpoint.\
+        \ This generates a JWT for the user using the configured application, client\
+        \ ID, and connection.<br><br>The OAuth 2.1 authorization request that follows\
+        \ [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749). Enables users to request\
+        \ a JWT signed by Authress and Returns an OAuth JWT containing the relevant\
+        \ user claims. Tokens generated must be verified before usage by validating\
+        \ the `sub`, `iss`, and `aud` properties in the JWT. Please note, that the\
+        \ properties in the request and response use snake_case to explicitly follow\
+        \ the standard.<br><br>The ExtensionClient in the [@authress/login](https://github.com/Authress/authress-login.js#platform-extension-login)\
+        \ npm package provides all the necessary logic to make this easy."
+      operationId: login
+      parameters:
+      - description: The client identifier to constrain the token to.
+        explode: true
+        in: query
+        name: client_id
+        required: true
+        schema:
+          example: ext_00AA
+          type: string
+        style: form
+      - description: "The PKCE Code challenge generated by the extension UI to secure\
+          \ the code exchange from [RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)."
+        explode: true
+        in: query
+        name: code_challenge
+        required: true
+        schema:
+          example: 6fdkQaPm51l13DSukcAH3Mdx7_ntecHYd1vi3n0hMZY
+          type: string
+        style: form
+      - description: The method used to generate the code_challenge from the code_verifier.
+          `code_challenge_method(code_verifier) = code_challenge`
+        explode: true
+        in: query
+        name: code_challenge_method
+        required: false
+        schema:
+          default: S256
+          enum:
+          - S256
+          type: string
+        style: form
+      - description: The location to redirect the user back to after login. This redirect_uri
+          must be a URL that matches one of the preconfigured urls in the Authress
+          Application.
+        explode: true
+        in: query
+        name: redirect_uri
+        required: true
+        schema:
+          example: https://extension.application.com/login-redirect
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/OAuthAuthorizeResponse'
+          description: Success.
+        "400":
+          description: Bad Request. There are one or more issues with the request
+            that prevent the service from returning a valid token
+        "401":
+          description: Unauthorized. The credentials and temporary security token
+            provided in the request is invalid
+      summary: OAuth Authorize
+      tags:
+      - Extensions
+      x-code-samples:
+      - lang: js
+        label: OAuth SDK
+        source: |-
+          const { ExtensionClient } = require('@authress/login');
+                    const extensionClient = new ExtensionClient('https://login.company.com', extensionId);
+
+                    // redirectUrl is where the extension would like to return the user to after login
+                    const { accessToken } = await extensionClient.login(redirectUrl);
+
+                    // After login the user is redirected to the redirectUrl, so try the login again:
+                    const { accessToken } = await extensionClient.login();
+
+                    // * Or get the user claims from the token
+                    await userData = await this.getUserIdentity();
+  /api/authentication/oauth/tokens:
+    post:
+      description: "*Note*: This endpoint is only to be used for [Authress Platform\
+        \ Extensions](https://authress.io/knowledge-base/docs/extensions/). If you\
+        \ are not building an app marketplace, then tokens can be directly requested\
+        \ for Service Clients, using the relevant [SDK](https://authress.io/app/#/api).<br><br>Request\
+        \ an OAuth JWT. Can either be called with service client credentials or as\
+        \ the second part of the user authorize login flow.<br>When using the `password`\
+        \ grant_type, service client authentication must be used via the Authress\
+        \ SDKs, and requires the `Authress:AuthenticateUser` role.<br><br>The OAuth\
+        \ 2.1 token request that follows [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749).\
+        \ Enables users to request a JWT signed by Authress, and returns an OAuth\
+        \ JWT containing the relevant user claims. Tokens generated must be verified\
+        \ before usage by validating the `sub`, `iss`, and `aud` properties in the\
+        \ JWT. Please note, that the properties in the request and response use snake_case\
+        \ to explicitly follow the standard.<br><br>The ExtensionClient in the [@authress/login](https://github.com/Authress/authress-login.js#platform-extension-login)\
+        \ npm package provides all the necessary logic to make this easy."
+      operationId: requestToken
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/OAuthTokenRequest'
+      responses:
+        "200":
+          content:
+            application/links+json:
+              schema:
+                $ref: '#/components/schemas/OAuthTokenResponse'
+          description: Success. The credentials provided are valid and token has been
+            created.
+        "400":
+          description: Bad Request. There are one or more issues with the request
+            that prevent the service from returning a valid token
+        "401":
+          description: Unauthorized. The credentials and temporary security token
+            provided in the request is invalid
+      summary: OAuth Token
+      tags:
+      - Extensions
+      x-code-samples:
+      - lang: js
+        label: OAuth SDK
+        source: |-
+          const { ExtensionClient } = require('@authress/login');
+                    const extensionClient = new ExtensionClient('https://login.company.com', extensionId);
+
+                    // redirectUrl is where the extension would like to return the user to after login
+                    const { accessToken } = await extensionClient.login(redirectUrl);
+
+                    // After login the user is redirected to the redirectUrl, so try the login again:
+                    const { accessToken } = await extensionClient.login();
+
+                    // * Or get the user claims from the token
+                    await userData = await this.getUserIdentity();
+components:
+  requestBodies:
+    AccessRecord:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessRecord'
+      required: true
+    AccessRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessRequest'
+      required: true
+    AccessRequestResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessRequestResponse'
+      required: true
+    Invite:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Invite'
+      required: true
+    ClaimRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClaimRequest'
+      required: true
+    Client:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client'
+      required: true
+    Connection:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Connection'
+      required: true
+    Group:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Group'
+      required: true
+    Extension:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Extension'
+      required: true
+    IdentityRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IdentityRequest'
+      required: true
+    MetadataRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MetadataObject'
+      description: "<strong>Important</strong>: Data request object which contains\
+        \ properties identifying the data as well as the metadata itself. While there\
+        \ is limited access, the data saved here should be considered encrypted with\
+        \ best practices (Encrypted in Transit and Encrypted at Rest only). However,\
+        \ while Authress will to store and access in the data in a safe way, usage\
+        \ of this endpoint affirms this data must be application data and not user\
+        \ data. If there are explicit regulations or compliances regarding the data\
+        \ and how it should be saved here, this endpoint must not be used. That includes,\
+        \ but is not limited to--user personal data, data that is protected by GDPR\
+        \ and similar data protection regulations."
+      required: true
+    PermissionedResource:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PermissionedResource'
+      description: The contents of the permission to set on the resource. Overwrites
+        existing data.
+      required: true
+    Role:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Role'
+      required: true
+    Tenant:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tenant'
+      required: true
+    TokenRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TokenRequest'
+      description: The contents of the permission to set on the token. Will be used
+        instead of the users or clients full permissions. Cannot include permissions
+        that the user or client do not have.
+      required: true
+    OAuthTokenRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthTokenRequest'
+      description: The contents of an OAuth token request.
+      required: true
+  schemas:
+    Account:
+      additionalProperties: false
+      properties:
+        accountId:
+          maxLength: 64
+          minLength: 1
+          type: string
+        createdTime:
+          format: date-time
+          readOnly: true
+          type: string
+        name:
+          maxLength: 32
+          nullable: true
+          type: string
+        company:
+          type: object
+        links:
+          $ref: '#/components/schemas/Account_links'
+      required:
+      - accountId
+      - company
+      - createdTime
+      - features
+      - links
+      type: object
+    AccountCollection:
+      additionalProperties: false
+      properties:
+        accounts:
+          $ref: '#/components/schemas/Account'
+      required:
+      - accounts
+      type: object
+    Connection:
+      additionalProperties: false
+      example:
+        tokenUrl: tokenUrl
+        clientId: clientId
+        data:
+          tenantId: tenantId
+          name: name
+          supportedContentType: application/json
+        issuerUrl: issuerUrl
+        connectionId: connectionId
+        createdTime: 2000-01-23T04:56:07.000+00:00
+        providerCertificate: providerCertificate
+        clientSecret: clientSecret
+        authenticationUrl: authenticationUrl
+        defaultConnectionProperties:
+          scope: profile email openid
+        type: OAUTH2
+        tags:
+          environment: production
+      properties:
+        type:
+          default: OAUTH2
+          enum:
+          - OAUTH2
+          - SAML2
+          - WebAuthN
+          type: string
+        connectionId:
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        authenticationUrl:
+          maxLength: 128
+          minLength: 1
+          type: string
+        tokenUrl:
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          type: string
+        issuerUrl:
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          type: string
+        providerCertificate:
+          maxLength: 4096
+          minLength: 1
+          nullable: true
+          type: string
+        clientId:
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          type: string
+        clientSecret:
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          type: string
+        data:
+          $ref: '#/components/schemas/Connection_data'
+        defaultConnectionProperties:
+          $ref: '#/components/schemas/Connection_defaultConnectionProperties'
+        createdTime:
+          format: date-time
+          readOnly: true
+          type: string
+        tags:
+          additionalProperties:
+            maxLength: 128
+            type: string
+          description: "The tags associated with this resource, this property is an\
+            \ map. { key1: value1, key2: value2 }"
+          example:
+            environment: production
+          nullable: true
+          type: object
+      type: object
+    ConnectionCollection:
+      additionalProperties: false
+      description: A collection of connections.
+      properties:
+        connections:
+          items:
+            $ref: '#/components/schemas/Connection'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - connections
+      type: object
+    Extension:
+      additionalProperties: false
+      example:
+        application:
+          links:
+            self:
+              rel: rel
+              href: href
+          applicationId: applicationId
+          redirectUrls:
+          - redirectUrls
+          - redirectUrls
+        name: "Extension: third party example"
+        createdTime: 2000-01-23T04:56:07.000+00:00
+        client:
+          clientId: clientId
+          links:
+            self:
+              rel: rel
+              href: href
+        extensionId: extensionId
+        tags:
+          environment: production
+      properties:
+        extensionId:
+          maxLength: 64
+          minLength: 1
+          readOnly: true
+          type: string
+        name:
+          description: The name of the extension. This name is visible in the Authress
+            management portal
+          example: "Extension: third party example"
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          type: string
+        createdTime:
+          format: date-time
+          readOnly: true
+          type: string
+        application:
+          $ref: '#/components/schemas/ExtensionApplication'
+        client:
+          $ref: '#/components/schemas/ExtensionClient'
+        tags:
+          additionalProperties:
+            maxLength: 128
+            type: string
+          description: "The tags associated with this resource, this property is an\
+            \ map. { key1: value1, key2: value2 }"
+          example:
+            environment: production
+          nullable: true
+          type: object
+      required:
+      - client
+      - createdTime
+      - extensionId
+      type: object
+    ExtensionCollection:
+      additionalProperties: false
+      description: A collection of platform extensions.
+      properties:
+        extensions:
+          items:
+            $ref: '#/components/schemas/Extension'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - extensions
+      type: object
+    UserConnectionCredentials:
+      additionalProperties: false
+      description: The user credentials for this connection which can be used to access
+        the connection provider APIs.
+      properties:
+        accessToken:
+          description: The access token.
+          type: string
+      required:
+      - accessToken
+      type: object
+    ApplicationDelegation:
+      additionalProperties: false
+      description: The delegation response.
+      properties:
+        authenticationUrl:
+          description: Redirect the user to this url to automatically log them into
+            a third-party application.
+          type: string
+      required:
+      - authenticationUrl
+      type: object
+    PermissionedResourceCollection:
+      additionalProperties: false
+      description: A collection of resource permissions that have been defined.
+      properties:
+        resources:
+          items:
+            $ref: '#/components/schemas/PermissionedResource'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - links
+      - resources
+      type: object
+    PermissionedResource:
+      additionalProperties: false
+      example:
+        permissions:
+        - allow: true
+          action: CLAIM
+        - allow: true
+          action: CLAIM
+      properties:
+        permissions:
+          items:
+            $ref: '#/components/schemas/ResourcePermission'
+          minItems: 1
+          type: array
+      required:
+      - permissions
+      type: object
+    Resource:
+      additionalProperties: false
+      example:
+        resourceUri: /organizations/org_a/documents/doc_1
+      properties:
+        resourceUri:
+          description: "A resource path which can be top level, fully qualified, or\
+            \ end with a *. Parent resources imply permissions to sub-resources."
+          example: /organizations/org_a/documents/doc_1
+          maxLength: 512
+          minLength: 1
+          pattern: "^([*]|[/]?((([a-zA-Z0-9-_.+=~|@]{1,128}|[*])(:([a-zA-Z0-9-_.+=~|@]{1,128}|[*]|))*)/?){0,15}([/][*]|[/]|))$"
+          type: string
+      required:
+      - resourceUri
+      type: object
+    ResourcePermission:
+      additionalProperties: false
+      example:
+        allow: true
+        action: CLAIM
+      properties:
+        action:
+          enum:
+          - CLAIM
+          - PUBLIC
+          type: string
+        allow:
+          type: boolean
+      required:
+      - action
+      - allow
+      type: object
+    ResourceUsersCollection:
+      additionalProperties: false
+      description: A collection of users with explicit permission to a resource.
+      properties:
+        users:
+          description: A list of users
+          items:
+            $ref: '#/components/schemas/UserRoleCollection'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - links
+      - users
+      type: object
+    Tenant:
+      additionalProperties: false
+      example:
+        data:
+          name: name
+        tenantLookupIdentifier: tenantLookupIdentifier
+        tenantId: tenantId
+        createdTime: 2000-01-23T04:56:07.000+00:00
+        connection:
+          connectionId: connectionId
+      properties:
+        tenantId:
+          maxLength: 128
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        tenantLookupIdentifier:
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        data:
+          $ref: '#/components/schemas/Tenant_data'
+        connection:
+          $ref: '#/components/schemas/Tenant_connection'
+        createdTime:
+          format: date-time
+          readOnly: true
+          type: string
+      required:
+      - tenantId
+      type: object
+    TenantCollection:
+      additionalProperties: false
+      description: A collection of tenants.
+      properties:
+        tenants:
+          items:
+            $ref: '#/components/schemas/Tenant'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+      - tenants
+      type: object
+    User:
+      additionalProperties: false
+      description: A user object that identifies a user.
+      example:
+        userId: oauth|userId
+      properties:
+        userId:
+          example: oauth|userId
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-._|/~:@]+$"
+          type: string
+      required:
+      - userId
+      type: object
+    UserIdentity:
+      additionalProperties: false
+      description: The user composite user identity stored in Authress sourced by
+        the customer SSO/SAML/OAuth IdP.
+      properties:
+        userId:
+          description: The user identifier.
+          example: oauth|userId
+          type: string
+        name:
+          description: The user's formatted display name.
+          example: Example User
+          type: string
+        picture:
+          description: A url that resolves to a picture that can be rendered.
+          example: https://www.gravatar.com/avatar/userId
+          type: string
+        email:
+          description: The user's verified email address sourced from their SSO IdP.
+          example: user@company.com
+          type: string
+      required:
+      - userId
+      type: object
+    UserIdentityCollection:
+      additionalProperties: false
+      description: A collection of user identities
+      properties:
+        users:
+          description: A list of users
+          items:
+            $ref: '#/components/schemas/UserIdentity'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - links
+      - users
+      type: object
+    Group:
+      additionalProperties: false
+      description: "A group of users, which can be added to access records."
+      example:
+        lastUpdated: 2000-01-23T04:56:07.000+00:00
+        groupId: grp_user_group_001
+        name: name
+        links:
+          self:
+            rel: rel
+            href: href
+        users:
+        - userId: oauth|userId
+        - userId: oauth|userId
+        admins:
+        - userId: oauth|userId
+        - userId: oauth|userId
+        tags:
+          environment: production
+      properties:
+        groupId:
+          description: "Unique identifier for the groupId, can be specified on record\
+            \ creation. Must begin with grp_."
+          example: grp_user_group_001
+          maxLength: 64
+          minLength: 1
+          pattern: "^grp_[a-zA-Z0-9-_]+$"
+          type: string
+        name:
+          description: A helpful name for this record
+          maxLength: 128
+          minLength: 1
+          type: string
+        lastUpdated:
+          description: The expected last time the group was updated
+          format: date-time
+          readOnly: true
+          type: string
+        users:
+          description: The list of users in this group
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+        admins:
+          description: The list of admins that can edit this record even if they do
+            not have global record edit permissions.
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+        links:
+          $ref: '#/components/schemas/Account_links'
+        tags:
+          additionalProperties:
+            maxLength: 128
+            type: string
+          description: "The tags associated with this resource, this property is an\
+            \ map. { key1: value1, key2: value2 }"
+          example:
+            environment: production
+          nullable: true
+          type: object
+      required:
+      - admins
+      - links
+      - name
+      - users
+      type: object
+    LinkedGroup:
+      additionalProperties: false
+      description: The referenced group
+      example:
+        groupId: "{}"
+      properties:
+        groupId:
+          $ref: '#/components/schemas/Group/properties/groupId'
+      required:
+      - groupId
+      type: object
+    GroupCollection:
+      additionalProperties: false
+      description: A collection of groups
+      properties:
+        groups:
+          description: A list of groups
+          items:
+            $ref: '#/components/schemas/Group'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - groups
+      - links
+      type: object
+    AccessRecord:
+      additionalProperties: false
+      description: The access record which links users to roles.
+      example:
+        description: ""
+        groups:
+        - groupId: "{}"
+        - groupId: "{}"
+        statements:
+        - roles:
+          - roles
+          - roles
+          resources:
+          - resourceUri: /organizations/org_a/documents/doc_1
+          - resourceUri: /organizations/org_a/documents/doc_1
+          groups:
+          - groupId: "{}"
+          - groupId: "{}"
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        - roles:
+          - roles
+          - roles
+          resources:
+          - resourceUri: /organizations/org_a/documents/doc_1
+          - resourceUri: /organizations/org_a/documents/doc_1
+          groups:
+          - groupId: "{}"
+          - groupId: "{}"
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        users:
+        - userId: oauth|userId
+        - userId: oauth|userId
+        capacity: 0.08008282
+        tags:
+          environment: production
+        recordId: recordId
+        lastUpdated: 2000-01-23T04:56:07.000+00:00
+        name: name
+        links:
+          self:
+            rel: rel
+            href: href
+        account:
+          accountId: accountId
+        admins:
+        - userId: oauth|userId
+        - userId: oauth|userId
+        status: ACTIVE
+      properties:
+        recordId:
+          description: "Unique identifier for the record, can be specified on record\
+            \ creation."
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          type: string
+        name:
+          description: A helpful name for this record
+          maxLength: 128
+          minLength: 1
+          type: string
+        description:
+          description: More details about this record
+          example: ""
+          maxLength: 1024
+          minLength: 0
+          nullable: true
+          type: string
+        capacity:
+          description: Percentage capacity of record that is filled.
+          format: float
+          maximum: 1
+          minimum: 0
+          readOnly: true
+          type: number
+        lastUpdated:
+          description: The expected last time the record was updated
+          format: date-time
+          readOnly: true
+          type: string
+        status:
+          description: Current status of the access record.
+          enum:
+          - ACTIVE
+          - DELETED
+          readOnly: true
+          type: string
+        account:
+          $ref: '#/components/schemas/AccessRecord_account'
+        users:
+          description: The list of users this record applies to
+          items:
+            $ref: '#/components/schemas/User'
+          nullable: true
+          type: array
+        admins:
+          description: The list of admin that can edit this record even if they do
+            not have global record edit permissions.
+          items:
+            $ref: '#/components/schemas/User'
+          nullable: true
+          type: array
+        groups:
+          description: The list of groups this record applies to. Users in these groups
+            will be receive access to the resources listed.
+          items:
+            $ref: '#/components/schemas/LinkedGroup'
+          nullable: true
+          type: array
+        statements:
+          description: A list of statements which match roles to resources.
+          items:
+            $ref: '#/components/schemas/Statement'
+          minItems: 1
+          type: array
+        links:
+          $ref: '#/components/schemas/Account_links'
+        tags:
+          additionalProperties:
+            maxLength: 128
+            type: string
+          description: "The tags associated with this resource, this property is an\
+            \ map. { key1: value1, key2: value2 }"
+          example:
+            environment: production
+          nullable: true
+          type: object
+      required:
+      - account
+      - links
+      - name
+      - statements
+      type: object
+    AccessRequest:
+      additionalProperties: false
+      description: The access requested by a user.
+      example:
+        lastUpdated: 2000-01-23T04:56:07.000+00:00
+        access:
+          statements:
+          - roles:
+            - roles
+            - roles
+            resources:
+            - resourceUri: /organizations/org_a/documents/doc_1
+            - resourceUri: /organizations/org_a/documents/doc_1
+            groups:
+            - groupId: "{}"
+            - groupId: "{}"
+            users:
+            - userId: oauth|userId
+            - userId: oauth|userId
+          - roles:
+            - roles
+            - roles
+            resources:
+            - resourceUri: /organizations/org_a/documents/doc_1
+            - resourceUri: /organizations/org_a/documents/doc_1
+            groups:
+            - groupId: "{}"
+            - groupId: "{}"
+            users:
+            - userId: oauth|userId
+            - userId: oauth|userId
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        requestId: requestId
+        links:
+          self:
+            rel: rel
+            href: href
+        status: OPEN
+        tags:
+          environment: production
+      properties:
+        requestId:
+          description: Unique identifier for the request.
+          maxLength: 100
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_:|~]+$"
+          readOnly: true
+          type: string
+        lastUpdated:
+          description: The expected last time the request was updated
+          format: date-time
+          readOnly: true
+          type: string
+        status:
+          description: Current status of the access request.
+          enum:
+          - OPEN
+          - APPROVED
+          - DENIED
+          - DELETED
+          readOnly: true
+          type: string
+        access:
+          $ref: '#/components/schemas/AccessTemplate'
+        links:
+          $ref: '#/components/schemas/Account_links'
+        tags:
+          additionalProperties:
+            maxLength: 128
+            type: string
+          description: "The tags associated with this resource, this property is an\
+            \ map. { key1: value1, key2: value2 }"
+          example:
+            environment: production
+          nullable: true
+          type: object
+      required:
+      - access
+      - links
+      - requestId
+      type: object
+    AccessRequestResponse:
+      additionalProperties: false
+      description: A dynamic body to support request PATCH operations
+      example:
+        status: APPROVED
+      properties:
+        status:
+          description: "New result, either approve or deny the request"
+          enum:
+          - APPROVED
+          - DENIED
+          type: string
+      required:
+      - status
+      type: object
+    AccessTemplate:
+      additionalProperties: false
+      description: A logical grouping of access related elements
+      example:
+        statements:
+        - roles:
+          - roles
+          - roles
+          resources:
+          - resourceUri: /organizations/org_a/documents/doc_1
+          - resourceUri: /organizations/org_a/documents/doc_1
+          groups:
+          - groupId: "{}"
+          - groupId: "{}"
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        - roles:
+          - roles
+          - roles
+          resources:
+          - resourceUri: /organizations/org_a/documents/doc_1
+          - resourceUri: /organizations/org_a/documents/doc_1
+          groups:
+          - groupId: "{}"
+          - groupId: "{}"
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        users:
+        - userId: oauth|userId
+        - userId: oauth|userId
+      properties:
+        users:
+          description: The list of users the access applies to
+          items:
+            $ref: '#/components/schemas/User'
+          minItems: 1
+          type: array
+        statements:
+          description: A list of statements which match roles to resources.
+          items:
+            $ref: '#/components/schemas/Statement'
+          minItems: 1
+          type: array
+      required:
+      - statements
+      - users
+      type: object
+    Invite:
+      description: The user invite used to invite users to your application or to
+        Authress as an admin.
+      example:
+        inviteId: inviteId
+        statements:
+        - roles:
+          - roles
+          - roles
+          resources:
+          - resourceUri: /organizations/org_a/documents/doc_1
+          - resourceUri: /organizations/org_a/documents/doc_1
+          groups:
+          - groupId: "{}"
+          - groupId: "{}"
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        - roles:
+          - roles
+          - roles
+          resources:
+          - resourceUri: /organizations/org_a/documents/doc_1
+          - resourceUri: /organizations/org_a/documents/doc_1
+          groups:
+          - groupId: "{}"
+          - groupId: "{}"
+          users:
+          - userId: oauth|userId
+          - userId: oauth|userId
+        links:
+          self:
+            rel: rel
+            href: href
+      properties:
+        inviteId:
+          description: The unique identifier for the invite. Use this ID to accept
+            the invite.
+          readOnly: true
+          type: string
+        statements:
+          description: A list of statements which match roles to resources. The invited
+            user will all statements apply to them
+          items:
+            $ref: '#/components/schemas/Statement'
+          minItems: 1
+          type: array
+        links:
+          $ref: '#/components/schemas/Account_links'
+      required:
+      - inviteId
+      - links
+      - statements
+      type: object
+    Statement:
+      additionalProperties: false
+      example:
+        roles:
+        - roles
+        - roles
+        resources:
+        - resourceUri: /organizations/org_a/documents/doc_1
+        - resourceUri: /organizations/org_a/documents/doc_1
+        groups:
+        - groupId: "{}"
+        - groupId: "{}"
+        users:
+        - userId: oauth|userId
+        - userId: oauth|userId
+      properties:
+        roles:
+          items:
+            maxLength: 64
+            minLength: 1
+            pattern: "^[a-zA-Z0-9-._:@]+$"
+            type: string
+          minItems: 1
+          type: array
+        resources:
+          items:
+            $ref: '#/components/schemas/Resource'
+          minItems: 1
+          type: array
+        users:
+          description: "The list of users this statement applies to. Users and groups\
+            \ can be set at either the statement level or the record level, but not\
+            \ both."
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+        groups:
+          description: "The list of groups this statement applies to. Users in these\
+            \ groups will be receive access to the resources listed. Users and groups\
+            \ can be set at either the statement level or the record level, but not\
+            \ both."
+          items:
+            $ref: '#/components/schemas/LinkedGroup'
+          type: array
+      required:
+      - resources
+      - roles
+      type: object
+    AccessRecordCollection:
+      additionalProperties: false
+      description: A collection of access records
+      properties:
+        records:
+          description: A list of access records
+          items:
+            $ref: '#/components/schemas/AccessRecord'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - links
+      - records
+      type: object
+    AccessRequestCollection:
+      additionalProperties: false
+      description: A collection of access requests
+      properties:
+        records:
+          description: A list of access requests
+          items:
+            $ref: '#/components/schemas/AccessRequest'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - links
+      - requests
+      type: object
+    RoleCollection:
+      additionalProperties: false
+      description: A collection of roles
+      properties:
+        roles:
+          description: A list of roles
+          items:
+            $ref: '#/components/schemas/Role'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - links
+      - roles
+      type: object
+    Role:
+      additionalProperties: false
+      description: The role which contains a list of permissions.
+      example:
+        roleId: roleId
+        permissions:
+        - allow: true
+          delegate: true
+          action: documents:read
+          grant: true
+        - allow: true
+          delegate: true
+          action: documents:read
+          grant: true
+        name: name
+        description: ""
+      properties:
+        roleId:
+          description: "Unique identifier for the role, can be specified on creation,\
+            \ and used by records to map to permissions."
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-._:@]+$"
+          type: string
+        name:
+          description: A helpful name for this role
+          maxLength: 128
+          minLength: 1
+          type: string
+        description:
+          description: A description for when to the user as well as additional information.
+          example: ""
+          maxLength: 1024
+          minLength: 0
+          nullable: true
+          type: string
+        permissions:
+          description: A list of the permissions
+          items:
+            $ref: '#/components/schemas/PermissionObject'
+          type: array
+      required:
+      - name
+      - permissions
+      - roleId
+      type: object
+    ClaimRequest:
+      additionalProperties: false
+      example:
+        resourceId: resourceId
+        collectionResource: collectionResource
+      properties:
+        collectionResource:
+          description: The parent resource to add a sub-resource to. The resource
+            must have a resource configuration that add the permission CLAIM for this
+            to work.
+          maxLength: 128
+          minLength: 1
+          type: string
+        resourceId:
+          description: The sub-resource the user is requesting Admin ownership over.
+          maxLength: 128
+          minLength: 1
+          type: string
+      required:
+      - collectionResource
+      - resourceId
+      type: object
+    ClaimResponse:
+      type: object
+    ClientCollection:
+      additionalProperties: false
+      description: The collection of a list of clients
+      properties:
+        clients:
+          description: A list of clients
+          items:
+            $ref: '#/components/schemas/Client'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - clients
+      - links
+      type: object
+    Client:
+      additionalProperties: false
+      description: A client configuration.
+      example:
+        clientId: clientId
+        verificationKeys:
+        - clientId: clientId
+          accessKey: accessKey
+          generationDate: 2000-01-23T04:56:07.000+00:00
+          keyId: keyId
+          clientSecret: clientSecret
+        - clientId: clientId
+          accessKey: accessKey
+          generationDate: 2000-01-23T04:56:07.000+00:00
+          keyId: keyId
+          clientSecret: clientSecret
+        name: ""
+        options:
+          grantUserPermissionsAccess: false
+          grantTokenGeneration: false
+        createdTime: 2000-01-23T04:56:07.000+00:00
+        tags:
+          environment: production
+      properties:
+        clientId:
+          description: The unique ID of the client.
+          readOnly: true
+          type: string
+        createdTime:
+          format: date-time
+          readOnly: true
+          type: string
+        name:
+          description: The name of the client
+          example: ""
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          type: string
+        options:
+          $ref: '#/components/schemas/Client_options'
+        verificationKeys:
+          description: A list of the service client access keys.
+          items:
+            $ref: '#/components/schemas/ClientAccessKey'
+          readOnly: true
+          type: array
+        tags:
+          additionalProperties:
+            maxLength: 128
+            type: string
+          description: "The tags associated with this resource, this property is an\
+            \ map. { key1: value1, key2: value2 }"
+          example:
+            environment: production
+          nullable: true
+          type: object
+      required:
+      - clientId
+      - createdTime
+      type: object
+    ExtensionClient:
+      additionalProperties: false
+      description: The extension's client configuration.
+      example:
+        clientId: clientId
+        links:
+          self:
+            rel: rel
+            href: href
+      properties:
+        clientId:
+          description: The unique ID of the client.
+          readOnly: true
+          type: string
+        links:
+          $ref: '#/components/schemas/Links'
+      required:
+      - clientId
+      - links
+      type: object
+    ExtensionApplication:
+      additionalProperties: false
+      description: The extension's application configuration. The application contains
+        the necessary information for users to log in to the extension.
+      example:
+        links:
+          self:
+            rel: rel
+            href: href
+        applicationId: applicationId
+        redirectUrls:
+        - redirectUrls
+        - redirectUrls
+      properties:
+        applicationId:
+          description: The unique ID of the application.
+          readOnly: true
+          type: string
+        redirectUrls:
+          items:
+            maxLength: 1024
+            type: string
+          nullable: true
+          type: array
+        links:
+          $ref: '#/components/schemas/Links'
+      required:
+      - applicationId
+      - links
+      type: object
+    ClientAccessKey:
+      additionalProperties: false
+      description: A client access key configuration. The configuration contains information
+        about the key. On first creation the configuration also contains the raw `clientSecret`
+        and `accessKey` for use with OAuth and the Authress SDKs.
+      example:
+        clientId: clientId
+        accessKey: accessKey
+        generationDate: 2000-01-23T04:56:07.000+00:00
+        keyId: keyId
+        clientSecret: clientSecret
+      properties:
+        keyId:
+          description: The unique ID of the client.
+          readOnly: true
+          type: string
+        clientId:
+          description: The unique ID of the client.
+          readOnly: true
+          type: string
+        generationDate:
+          format: date-time
+          readOnly: true
+          type: string
+        clientSecret:
+          description: The unencoded OAuth client secret used with the OAuth endpoints
+            to request a JWT using the `client_credentials` grant type. Pass the clientId
+            and the clientSecret to the documented /tokens endpoint.
+          readOnly: true
+          type: string
+        accessKey:
+          description: An encoded access key which contains identifying information
+            for client access token creation. For direct use with the Authress SDKs.
+            This private access key must be saved on first creation as it is discarded
+            afterwards. Authress only saves the corresponding public key to verify
+            the private access key.
+          readOnly: true
+          type: string
+      required:
+      - clientId
+      type: object
+    IdentityRequest:
+      additionalProperties: false
+      description: Request to link an identity provider's audience and your app's
+        audience with Authress.
+      example:
+        preferredAudience: '*'
+        jwt: jwt
+        issuer: issuer
+      oneOf:
+      - required:
+        - jwt
+      - required:
+        - issuer
+      properties:
+        jwt:
+          description: A valid JWT OIDC compliant token which will still pass authentication
+            requests to the identity provider. Must contain a unique audience and
+            issuer.
+          nullable: true
+          type: string
+        issuer:
+          description: The issuer of the OAuth OIDC provider's JWTs. This value should
+            match the `iss` claim in the provided tokens exactly.
+          nullable: true
+          type: string
+        preferredAudience:
+          default: '*'
+          description: "If the `jwt` token contains more than one valid audience,\
+            \ then the single audience that should associated with Authress. If more\
+            \ than one audience is preferred, repeat this call with each one."
+          nullable: true
+          type: string
+      type: object
+    IdentityCollection:
+      additionalProperties: false
+      properties:
+        identities:
+          items:
+            $ref: '#/components/schemas/Identity'
+          type: array
+      required:
+      - identities
+      type: object
+    Identity:
+      additionalProperties: false
+      description: The identifying information which uniquely links a JWT OIDC token
+        to an identity provider
+      properties:
+        issuer:
+          description: The issuer of the JWT token. This can be any OIDC compliant
+            provider.
+          type: string
+        audience:
+          description: "The audience of the JWT token. This can be either an audience\
+            \ for your entire app, or one particular audience for it. If there is\
+            \ more than one audience, multiple identities can be created."
+          type: string
+      required:
+      - audience
+      - issuer
+      type: object
+    Pagination:
+      description: Details containing how to pagination through the collection. Consists
+        of an optional *next* property that may contain a cursor. Pagination is mutable
+        and the list can change between requests.
+      properties:
+        next:
+          $ref: '#/components/schemas/Pagination_next'
+      readOnly: true
+      type: object
+    Links:
+      example:
+        self:
+          rel: rel
+          href: href
+      properties:
+        self:
+          $ref: '#/components/schemas/Link'
+      readOnly: true
+      required:
+      - self
+      type: object
+    CollectionLinks:
+      properties:
+        self:
+          $ref: '#/components/schemas/Link'
+        next:
+          $ref: '#/components/schemas/Link'
+      readOnly: true
+      required:
+      - self
+      type: object
+    Tags:
+      additionalProperties:
+        maxLength: 128
+        type: string
+      description: "The tags associated with this resource, this property is an map.\
+        \ { key1: value1, key2: value2 }"
+      example:
+        environment: production
+      nullable: true
+      type: object
+    Link:
+      additionalProperties: false
+      description: A url linking object that complies to application/links+json RFC.
+        Either is an IANA approved link relation or has a custom rel specified.
+      example:
+        rel: rel
+        href: href
+      nullable: true
+      properties:
+        href:
+          description: The absolute url pointing to the reference resource.
+          type: string
+        rel:
+          description: Optional property indicating the type of link if it is not
+            a default IANA approved global link relation.
+          type: string
+      required:
+      - href
+      type: object
+    MetadataObject:
+      additionalProperties: false
+      description: Metadata and additional properties relevant.
+      properties:
+        account:
+          $ref: '#/components/schemas/MetadataObject_account'
+        userId:
+          $ref: '#/components/schemas/User/properties/userId'
+        metadata:
+          description: A JSON object limited to 10KB. The owner identified by the
+            sub will always have access to read and update this data. Service clients
+            may have access if the related property on the client is set. Access is
+            restricted to authorized users.
+          example: {}
+          nullable: true
+          type: object
+      required:
+      - accountId
+      - metadata
+      - userId
+      type: object
+    PermissionObject:
+      additionalProperties: false
+      description: The collective action and associate grants on a permission
+      example:
+        allow: true
+        delegate: true
+        action: documents:read
+        grant: true
+      properties:
+        action:
+          description: "The action the permission grants, can be scoped using `:`\
+            \ and parent actions imply sub-resource permissions, action:* or action\
+            \ implies action:sub-action. This property is case-insensitive, it will\
+            \ always be cast to lowercase before comparing actions to user permissions."
+          example: documents:read
+          maxLength: 64
+          minLength: 1
+          pattern: "^([*]|[a-zA-Z0-9-_]+)(:([*]|[a-zA-Z0-9-_]+))*$"
+          type: string
+        allow:
+          description: Does this permission grant the user the ability to execute
+            the action?
+          type: boolean
+        grant:
+          description: Allows the user to give the permission to others without being
+            able to execute the action.
+          type: boolean
+        delegate:
+          description: Allows delegating or granting the permission to others without
+            being able to execute the action.
+          type: boolean
+      required:
+      - action
+      - allow
+      - delegate
+      - grant
+      type: object
+    PermissionCollection:
+      additionalProperties: false
+      description: A collect of permissions that the user has to a resource.
+      properties:
+        account:
+          $ref: '#/components/schemas/PermissionCollection_account'
+        userId:
+          $ref: '#/components/schemas/User/properties/userId'
+        permissions:
+          description: A list of the permissions
+          items:
+            $ref: '#/components/schemas/PermissionObject'
+          type: array
+      required:
+      - accountId
+      - permissions
+      - userId
+      type: object
+    UserRoleCollection:
+      additionalProperties: false
+      description: A collect of roles that the user has to a resource.
+      properties:
+        userId:
+          $ref: '#/components/schemas/User/properties/userId'
+        roles:
+          description: A list of the roles
+          items:
+            $ref: '#/components/schemas/UserRole'
+          type: array
+      required:
+      - roles
+      - userId
+      type: object
+    UserRole:
+      additionalProperties: false
+      description: A role with associated role data.
+      properties:
+        roleId:
+          $ref: '#/components/schemas/Role/properties/roleId'
+      required:
+      - roleId
+      type: object
+    UserResources:
+      additionalProperties: false
+      description: A collect of permissions that the user has to a resource.
+      properties:
+        account:
+          $ref: '#/components/schemas/PermissionCollection_account'
+        userId:
+          $ref: '#/components/schemas/User/properties/userId'
+        resources:
+          description: A list of the resources the user has some permission to.
+          items:
+            $ref: '#/components/schemas/Resource'
+          type: array
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        links:
+          $ref: '#/components/schemas/CollectionLinks'
+      required:
+      - accountId
+      - links
+      - permissions
+      - userId
+      type: object
+    UserToken:
+      additionalProperties: false
+      description: A JWT token with represents the user.
+      properties:
+        account:
+          $ref: '#/components/schemas/PermissionCollection_account'
+        userId:
+          $ref: '#/components/schemas/User/properties/userId'
+        tokenId:
+          description: The unique identifier for the token
+          type: string
+        token:
+          description: The access token
+          type: string
+        links:
+          $ref: '#/components/schemas/Account_links'
+      required:
+      - accountId
+      - token
+      - tokenId
+      - userId
+      type: object
+    TokenRequest:
+      additionalProperties: false
+      properties:
+        statements:
+          description: A list of statements which match roles to resources. The token
+            will have all statements apply to it.
+          items:
+            $ref: '#/components/schemas/Statement'
+          minItems: 1
+          type: array
+        expires:
+          description: The ISO8601 datetime when the token will expire. Default is
+            24 hours from now.
+          format: date-time
+          type: string
+      required:
+      - expires
+      - statements
+      type: object
+    OAuthTokenRequest:
+      description: "The OAuth 2.1 token request that follows [RFC 6749](https://www.rfc-editor.org/rfc/rfc6749).\
+        \ The properties in the request must be snake_case to follow the standard."
+      example:
+        password: password
+        grant_type: client_credentials
+        client_secret: client_secret
+        type: signup
+        client_id: client_id
+        code_verifier: code_verifier
+        username: username
+      properties:
+        client_id:
+          description: The client identifier to constrain the token to.
+          type: string
+        client_secret:
+          description: The secret associated with the client that authorizes the generation
+            of token it's behalf. (Either the `client_secret` or the `code_verifier`
+            is required)
+          nullable: true
+          type: string
+        code_verifier:
+          description: The code verifier is the the value used in the generation of
+            the OAuth authorization request `code_challenge` property. (Either the
+            `client_secret` or the `code_verifier` is required)
+          type: string
+        grant_type:
+          description: A suggestion to the token generation which type of credentials
+            are being provided.
+          enum:
+          - client_credentials
+          - authorization_code
+          - password
+          type: string
+        username:
+          description: "When using the user password grant_type, specify the username.\
+            \ Authress recommends this should always be an email address."
+          nullable: true
+          type: string
+        password:
+          description: "When using the user password grant_type, specify the user's\
+            \ password."
+          nullable: true
+          type: string
+        type:
+          description: "Enables additional configuration of the grant_type. In the\
+            \ case of user password grant_type, set this to **signup**, to enable\
+            \ the creation of users. Set this to **update**, force update the password\
+            \ associated with the user."
+          enum:
+          - signup
+          - update
+          nullable: true
+          type: string
+      required:
+      - client_id
+      type: object
+    OAuthTokenResponse:
+      additionalProperties: false
+      properties:
+        access_token:
+          description: An expiring access token that can be used to access either
+            Authress or any platform service.
+          type: string
+      required:
+      - access_token
+      type: object
+    OAuthAuthorizeResponse:
+      additionalProperties: false
+      properties:
+        code:
+          description: The authorization code to be used with the /tokens endpoint
+            to retrieve an access_token.
+          type: string
+      required:
+      - code
+      type: object
+    Account_links:
+      example:
+        self:
+          rel: rel
+          href: href
+      properties:
+        self:
+          $ref: '#/components/schemas/Link'
+      readOnly: true
+      required:
+      - self
+      type: object
+    Connection_data:
+      additionalProperties: false
+      example:
+        tenantId: tenantId
+        name: name
+        supportedContentType: application/json
+      nullable: true
+      properties:
+        tenantId:
+          maxLength: 128
+          minLength: 1
+          nullable: true
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+        name:
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          type: string
+        supportedContentType:
+          default: application/json
+          enum:
+          - application/json
+          - application/x-www-form-urlencoded
+          type: string
+      type: object
+    Connection_defaultConnectionProperties:
+      additionalProperties:
+        maxLength: 128
+        type: string
+      example:
+        scope: profile email openid
+      nullable: true
+      properties:
+        scope:
+          default: profile email openid
+          maxLength: 128
+          nullable: true
+          type: string
+      type: object
+    Tenant_data:
+      additionalProperties: false
+      example:
+        name: name
+      properties:
+        name:
+          maxLength: 64
+          minLength: 1
+          nullable: true
+          type: string
+      type: object
+    Tenant_connection:
+      additionalProperties: false
+      example:
+        connectionId: connectionId
+      nullable: true
+      properties:
+        connectionId:
+          maxLength: 64
+          minLength: 1
+          pattern: "^[a-zA-Z0-9-_.:]+$"
+          type: string
+      type: object
+    AccessRecord_account:
+      additionalProperties: false
+      example:
+        accountId: accountId
+      properties:
+        accountId:
+          type: string
+      readOnly: true
+      required:
+      - accountId
+      type: object
+    Client_options:
+      additionalProperties: false
+      description: A set of client specific options
+      example:
+        grantUserPermissionsAccess: false
+        grantTokenGeneration: false
+      properties:
+        grantUserPermissionsAccess:
+          default: false
+          description: Grant the client access to verify authorization on behalf of
+            any user.
+          example: false
+          nullable: true
+          type: boolean
+        grantTokenGeneration:
+          default: false
+          description: "Grant the client access to generate oauth tokens on behalf\
+            \ of the Authress account. **Security Warning**: This means that this\
+            \ client can impersonate any user, and should only be used when connecting\
+            \ an existing custom Authorization Server to Authress, when that server\
+            \ does not support a standard OAuth connection."
+          example: false
+          nullable: true
+          type: boolean
+      type: object
+    Pagination_next:
+      description: "A reference to the next page in the collection, pass the cursor\
+        \ as a query parameter in the subsequent request to get the next page."
+      nullable: true
+      properties:
+        cursor:
+          type: string
+      required:
+      - cursor
+      type: object
+    MetadataObject_account:
+      additionalProperties: false
+      properties:
+        accountId:
+          type: string
+      readOnly: true
+      type: object
+    PermissionCollection_account:
+      additionalProperties: false
+      properties:
+        accountId:
+          type: string
+      type: object
+  securitySchemes:
+    oauth2:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+
