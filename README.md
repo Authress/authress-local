@@ -14,7 +14,7 @@ Additionally, Authress local is great way to develop with Authress without needi
         <img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg">
     </a>
     <a href="./LICENSE" alt="agpl-3.0 license">
-      <img src="https://img.shields.io/badge/license-AGPL-3.0-blue.svg">
+      <img src="https://img.shields.io/badge/License-AGPL3.0-blue.svg">
     </a>
     <a href="https://authress.io/community" alt="authress community">
       <img src="https://img.shields.io/badge/Community-Authress-fbaf0b.svg">
