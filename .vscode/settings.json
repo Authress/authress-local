@@ -3,7 +3,8 @@
         "chrono",
         "dashmap",
         "Permissioned",
-        "RESOURCEURI"
+        "RESOURCEURI",
+        "rustup"
     ],
     "cSpell.ignoreRegExpList": ["[a-z]+ID"]
 }

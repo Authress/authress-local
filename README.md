@@ -13,7 +13,7 @@ Additionally, Authress local is great way to develop with Authress without needi
 
 <p align="center">
     <a href="https://crates.io/crates/authress-local" alt="Authress Local Container">
-        <img src="https://img.shields.io/badge/Container-authress/authress--local-DC7100.svg">
+        <img src="https://img.shields.io/badge/Container-ghcr.io%2FAuthress%2Fauthress--local-DC7100.svg">
     </a>
     <a href="https://github.com/Authress/authress-local/actions" alt="GitHub action status">
         <img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg">
@@ -33,14 +33,16 @@ Run the container locally:
 
 #### Docker
 ```sh
-docker pull authress/authress-local
-docker run -d -p 8888:8080 authress/authress-local
+docker pull ghcr.io/Authress/authress-local:latest
+docker run -d -p 8888:8888 authress/authress-local:latest
+# Run in terminal: docker run -d -p 8888:8888 authress/authress-local:latest
 ```
 
 #### Podman
 ```sh
-podman pull docker://authress/authress-local
-podman run -d -p 8888:8080 authress/authress-local
+podman pull ghcr.io/Authress/authress-local:latest
+podman run -d -p 8888:8888 authress/authress-local:latest
+# Run in terminal: podman run -d -p 8888:8888 authress/authress-local:latest
 ```
 
 This will run the container locally on port `8888`, if you want to run the container on a different port, change the `8888` to another port number.
