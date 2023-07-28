@@ -36,8 +36,9 @@ jobs:
       - name: Create Github Release and Tag
         if: github.repository_owner == 'Authress' && github.event_name == 'push'
         run: |
-          branchId="${GITHUB_REF/refs\/heads\/release\//}"
-          export VERSION="${branchId/main/0.0}.${GITHUB_RUN_NUMBER}"
+          branchRef="${GITHUB_REF/refs\/heads\/release\//}"
+          branchId="${branchRef/refs\/heads\//}"
+          export VERSION="${branchId/main/0.0}.${GITHUB_RUN_NUMBER:-0}"
           sed -i "s/0.0.0/${VERSION}/g" ./Cargo.toml -i
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo Building version: ${{ env.VERSION }}
