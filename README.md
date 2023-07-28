@@ -12,8 +12,8 @@ Authress local stands up an API that offers parity with the [Authress Authorizat
 Additionally, Authress local is great way to develop with Authress without needing to have an Authress account.
 
 <p align="center">
-    <a href="https://crates.io/crates/authress-local" alt="Authress Local Container">
-        <img src="https://img.shields.io/badge/Container-ghcr.io%2FAuthress%2Fauthress--local-DC7100.svg">
+    <a href="https://github.com/Authress/authress-local/pkgs/container/authress-local" alt="Authress Local Container">
+        <img src="https://img.shields.io/badge/Container-ghcr.io%2Fauthress%2Fauthress--local-DC7100.svg">
     </a>
     <a href="https://github.com/Authress/authress-local/actions" alt="GitHub action status">
         <img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg">
@@ -33,14 +33,14 @@ Run the container locally:
 
 #### Docker
 ```sh
-docker pull ghcr.io/Authress/authress-local:latest
+docker pull ghcr.io/authress/authress-local:latest
 docker run -d -p 8888:8888 authress/authress-local:latest
 # Run in terminal: docker run -d -p 8888:8888 authress/authress-local:latest
 ```
 
 #### Podman
 ```sh
-podman pull ghcr.io/Authress/authress-local:latest
+podman pull ghcr.io/authress/authress-local:latest
 podman run -d -p 8888:8888 authress/authress-local:latest
 # Run in terminal: podman run -d -p 8888:8888 authress/authress-local:latest
 ```
