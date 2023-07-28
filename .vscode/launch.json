@@ -7,7 +7,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'authress_local'",
+            "name": "Debug unit tests inner module",
             "cargo": {
                 "args": [
                     "test",
@@ -26,10 +26,11 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug example 'server'",
+            "name": "Debug 'server'",
             "cargo": {
                 "args": [
                     "build",
+                    "--color=always",
                     "--example=server",
                     "--package=authress_local"
                 ],
@@ -44,7 +45,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in example 'server'",
+            "name": "Debug unit tests in server",
             "cargo": {
                 "args": [
                     "test",

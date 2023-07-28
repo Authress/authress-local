@@ -4867,13 +4867,13 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct LinkedGroup {
     #[serde(rename = "groupId")]
-    pub group_id: models::GroupSlashPropertiesSlashGroupId,
+    pub group_id: String,
 
 }
 
 impl LinkedGroup {
     #[allow(clippy::new_without_default)]
-    pub fn new(group_id: models::GroupSlashPropertiesSlashGroupId, ) -> LinkedGroup {
+    pub fn new(group_id: String, ) -> LinkedGroup {
         LinkedGroup {
             group_id,
         }
@@ -4905,7 +4905,7 @@ impl std::str::FromStr for LinkedGroup {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub group_id: Vec<models::GroupSlashPropertiesSlashGroupId>,
+            pub group_id: Vec<String>,
         }
 
         let mut intermediate_rep = IntermediateRep::default();
@@ -4924,7 +4924,7 @@ impl std::str::FromStr for LinkedGroup {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "groupId" => intermediate_rep.group_id.push(<models::GroupSlashPropertiesSlashGroupId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "groupId" => intermediate_rep.group_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing LinkedGroup".to_string())
                 }
             }
@@ -5103,7 +5103,7 @@ pub struct MetadataObject {
     pub account: Option<models::MetadataObjectAccount>,
 
     #[serde(rename = "userId")]
-    pub user_id: models::UserSlashPropertiesSlashUserId,
+    pub user_id: String,
 
     /// A JSON object limited to 10KB. The owner identified by the sub will always have access to read and update this data. Service clients may have access if the related property on the client is set. Access is restricted to authorized users.
     #[serde(rename = "metadata")]
@@ -5113,7 +5113,7 @@ pub struct MetadataObject {
 
 impl MetadataObject {
     #[allow(clippy::new_without_default)]
-    pub fn new(user_id: models::UserSlashPropertiesSlashUserId, metadata: serde_json::Value, ) -> MetadataObject {
+    pub fn new(user_id: String, metadata: serde_json::Value, ) -> MetadataObject {
         MetadataObject {
             account: None,
             user_id,
@@ -5152,7 +5152,7 @@ impl std::str::FromStr for MetadataObject {
         #[allow(dead_code)]
         struct IntermediateRep {
             pub account: Vec<models::MetadataObjectAccount>,
-            pub user_id: Vec<models::UserSlashPropertiesSlashUserId>,
+            pub user_id: Vec<String>,
             pub metadata: Vec<serde_json::Value>,
         }
 
@@ -5174,7 +5174,7 @@ impl std::str::FromStr for MetadataObject {
                     #[allow(clippy::redundant_clone)]
                     "account" => intermediate_rep.account.push(<models::MetadataObjectAccount as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "userId" => intermediate_rep.user_id.push(<models::UserSlashPropertiesSlashUserId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "userId" => intermediate_rep.user_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
                     "metadata" => intermediate_rep.metadata.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing MetadataObject".to_string())
@@ -6075,7 +6075,7 @@ pub struct PermissionCollection {
     pub account: Option<models::PermissionCollectionAccount>,
 
     #[serde(rename = "userId")]
-    pub user_id: models::UserSlashPropertiesSlashUserId,
+    pub user_id: String,
 
     /// A list of the permissions
     #[serde(rename = "permissions")]
@@ -6085,7 +6085,7 @@ pub struct PermissionCollection {
 
 impl PermissionCollection {
     #[allow(clippy::new_without_default)]
-    pub fn new(user_id: models::UserSlashPropertiesSlashUserId, permissions: Vec<models::PermissionObject>, ) -> PermissionCollection {
+    pub fn new(user_id: String, permissions: Vec<models::PermissionObject>, ) -> PermissionCollection {
         PermissionCollection {
             account: None,
             user_id,
@@ -6124,7 +6124,7 @@ impl std::str::FromStr for PermissionCollection {
         #[allow(dead_code)]
         struct IntermediateRep {
             pub account: Vec<models::PermissionCollectionAccount>,
-            pub user_id: Vec<models::UserSlashPropertiesSlashUserId>,
+            pub user_id: Vec<String>,
             pub permissions: Vec<Vec<models::PermissionObject>>,
         }
 
@@ -6146,7 +6146,7 @@ impl std::str::FromStr for PermissionCollection {
                     #[allow(clippy::redundant_clone)]
                     "account" => intermediate_rep.account.push(<models::PermissionCollectionAccount as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "userId" => intermediate_rep.user_id.push(<models::UserSlashPropertiesSlashUserId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "userId" => intermediate_rep.user_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     "permissions" => return std::result::Result::Err("Parsing a container in this style is not supported in PermissionCollection".to_string()),
                     _ => return std::result::Result::Err("Unexpected key while parsing PermissionCollection".to_string())
                 }
@@ -8805,7 +8805,7 @@ pub struct UserResources {
     pub account: Option<models::PermissionCollectionAccount>,
 
     #[serde(rename = "userId")]
-    pub user_id: models::UserSlashPropertiesSlashUserId,
+    pub user_id: String,
 
     /// A list of the resources the user has some permission to.
     #[serde(rename = "resources")]
@@ -8823,7 +8823,7 @@ pub struct UserResources {
 
 impl UserResources {
     #[allow(clippy::new_without_default)]
-    pub fn new(user_id: models::UserSlashPropertiesSlashUserId, links: models::CollectionLinks, ) -> UserResources {
+    pub fn new(user_id: String, links: models::CollectionLinks, ) -> UserResources {
         UserResources {
             account: None,
             user_id,
@@ -8868,7 +8868,7 @@ impl std::str::FromStr for UserResources {
         #[allow(dead_code)]
         struct IntermediateRep {
             pub account: Vec<models::PermissionCollectionAccount>,
-            pub user_id: Vec<models::UserSlashPropertiesSlashUserId>,
+            pub user_id: Vec<String>,
             pub resources: Vec<Vec<models::Resource>>,
             pub pagination: Vec<models::Pagination>,
             pub links: Vec<models::CollectionLinks>,
@@ -8892,7 +8892,7 @@ impl std::str::FromStr for UserResources {
                     #[allow(clippy::redundant_clone)]
                     "account" => intermediate_rep.account.push(<models::PermissionCollectionAccount as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "userId" => intermediate_rep.user_id.push(<models::UserSlashPropertiesSlashUserId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "userId" => intermediate_rep.user_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     "resources" => return std::result::Result::Err("Parsing a container in this style is not supported in UserResources".to_string()),
                     #[allow(clippy::redundant_clone)]
                     "pagination" => intermediate_rep.pagination.push(<models::Pagination as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
@@ -8961,13 +8961,13 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct UserRole {
     #[serde(rename = "roleId")]
-    pub role_id: models::RoleSlashPropertiesSlashRoleId,
+    pub role_id: String,
 
 }
 
 impl UserRole {
     #[allow(clippy::new_without_default)]
-    pub fn new(role_id: models::RoleSlashPropertiesSlashRoleId, ) -> UserRole {
+    pub fn new(role_id: String, ) -> UserRole {
         UserRole {
             role_id,
         }
@@ -8999,7 +8999,7 @@ impl std::str::FromStr for UserRole {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub role_id: Vec<models::RoleSlashPropertiesSlashRoleId>,
+            pub role_id: Vec<String>,
         }
 
         let mut intermediate_rep = IntermediateRep::default();
@@ -9018,7 +9018,7 @@ impl std::str::FromStr for UserRole {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "roleId" => intermediate_rep.role_id.push(<models::RoleSlashPropertiesSlashRoleId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "roleId" => intermediate_rep.role_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing UserRole".to_string())
                 }
             }
@@ -9078,7 +9078,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct UserRoleCollection {
     #[serde(rename = "userId")]
-    pub user_id: models::UserSlashPropertiesSlashUserId,
+    pub user_id: String,
 
     /// A list of the roles
     #[serde(rename = "roles")]
@@ -9088,7 +9088,7 @@ pub struct UserRoleCollection {
 
 impl UserRoleCollection {
     #[allow(clippy::new_without_default)]
-    pub fn new(user_id: models::UserSlashPropertiesSlashUserId, roles: Vec<models::UserRole>, ) -> UserRoleCollection {
+    pub fn new(user_id: String, roles: Vec<models::UserRole>, ) -> UserRoleCollection {
         UserRoleCollection {
             user_id,
             roles,
@@ -9123,7 +9123,7 @@ impl std::str::FromStr for UserRoleCollection {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub user_id: Vec<models::UserSlashPropertiesSlashUserId>,
+            pub user_id: Vec<String>,
             pub roles: Vec<Vec<models::UserRole>>,
         }
 
@@ -9143,7 +9143,7 @@ impl std::str::FromStr for UserRoleCollection {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "userId" => intermediate_rep.user_id.push(<models::UserSlashPropertiesSlashUserId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "userId" => intermediate_rep.user_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     "roles" => return std::result::Result::Err("Parsing a container in this style is not supported in UserRoleCollection".to_string()),
                     _ => return std::result::Result::Err("Unexpected key while parsing UserRoleCollection".to_string())
                 }
@@ -9209,7 +9209,7 @@ pub struct UserToken {
     pub account: Option<models::PermissionCollectionAccount>,
 
     #[serde(rename = "userId")]
-    pub user_id: models::UserSlashPropertiesSlashUserId,
+    pub user_id: String,
 
     /// The unique identifier for the token
     #[serde(rename = "tokenId")]
@@ -9227,7 +9227,7 @@ pub struct UserToken {
 
 impl UserToken {
     #[allow(clippy::new_without_default)]
-    pub fn new(user_id: models::UserSlashPropertiesSlashUserId, token_id: String, token: String, ) -> UserToken {
+    pub fn new(user_id: String, token_id: String, token: String, ) -> UserToken {
         UserToken {
             account: None,
             user_id,
@@ -9276,7 +9276,7 @@ impl std::str::FromStr for UserToken {
         #[allow(dead_code)]
         struct IntermediateRep {
             pub account: Vec<models::PermissionCollectionAccount>,
-            pub user_id: Vec<models::UserSlashPropertiesSlashUserId>,
+            pub user_id: Vec<String>,
             pub token_id: Vec<String>,
             pub token: Vec<String>,
             pub links: Vec<models::AccountLinks>,
@@ -9300,7 +9300,7 @@ impl std::str::FromStr for UserToken {
                     #[allow(clippy::redundant_clone)]
                     "account" => intermediate_rep.account.push(<models::PermissionCollectionAccount as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "userId" => intermediate_rep.user_id.push(<models::UserSlashPropertiesSlashUserId as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "userId" => intermediate_rep.user_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
                     "tokenId" => intermediate_rep.token_id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]

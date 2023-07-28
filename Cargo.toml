@@ -1,3 +1,5 @@
+# Schema Allowed Properties in the Cargo.toml manifest: https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [package]
 name = "authress_local"
 
@@ -48,10 +50,12 @@ frunk_core = { version = "0.3.0", optional = true }
 frunk-enum-derive = { version = "0.2.0", optional = true }
 frunk-enum-core = { version = "0.2.0", optional = true }
 authress = "0.1.41"
+dashmap = { version = "5.5.0", features = [] }
+nanoid = "0.4.0"
 
 [dev-dependencies]
 clap = "2.25"
-env_logger = "0.7"
+simple_logger = "4.2.0"
 tokio = { version = "1.14", features = ["full"] }
 native-tls = "0.2"
 

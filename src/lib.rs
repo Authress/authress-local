@@ -20,6 +20,7 @@ pub struct NotImplementedError(pub String);
 pub enum ApiError {
     NotImplementedError(String),
     UnknownApiError(String)
+    
 }
 
 pub const BASE_PATH: &str = "";
@@ -63,10 +64,7 @@ pub enum CreateRecordResponse {
     Success
     {
         body: String,
-        last_modified:
-        Option<
-        String
-        >
+        last_modified: Option<String>
     }
     ,
     /// Unauthorized. The request JWT found in the Authorization header is no longer valid.

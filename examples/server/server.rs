@@ -22,13 +22,20 @@ use tokio::net::TcpListener;
 #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
 use openssl::ssl::{Ssl, SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 
+// use crate::models;
 use authress::models;
 
+use authress_local::*;
+use authress_local::server::MakeService;
+use std::error::Error;
+
+use crate::databases::{Databases, self};
+
 /// Builds an SSL implementation for Simple HTTPS from some hard-coded file names
-pub async fn create(addr: &str, https: bool) {
+pub async fn create(addr: &str, https: bool, databases: &'static Databases) {
     let addr = addr.parse().expect("Failed to parse bind address");
 
-    let server = Server::new();
+    let server = Server::new(&databases);
 
     let service = MakeService::new(server);
 
@@ -85,85 +92,17 @@ pub async fn create(addr: &str, https: bool) {
 #[derive(Copy, Clone)]
 pub struct Server<C> {
     marker: PhantomData<C>,
+    databases: &'static Databases
 }
 
 impl<C> Server<C> {
-    pub fn new() -> Self {
-        Server{marker: PhantomData}
+    pub fn new(databases: &'static Databases) -> Self {
+        Server {
+            marker: PhantomData,
+            databases: &databases
+        }
     }
 }
-
-
-use authress_local::{
-    Api,
-    CreateClaimResponse,
-    CreateInviteResponse,
-    CreateRecordResponse,
-    CreateRequestResponse,
-    DeleteInviteResponse,
-    DeleteRecordResponse,
-    DeleteRequestResponse,
-    GetRecordResponse,
-    GetRecordsResponse,
-    GetRequestResponse,
-    GetRequestsResponse,
-    RespondToAccessRequestResponse,
-    RespondToInviteResponse,
-    UpdateRecordResponse,
-    DelegateAuthenticationResponse,
-    GetAccountResponse,
-    GetAccountIdentitiesResponse,
-    GetAccountsResponse,
-    DelegateUserLoginResponse,
-    CreateConnectionResponse,
-    DeleteConnectionResponse,
-    GetConnectionResponse,
-    GetConnectionCredentialsResponse,
-    GetConnectionsResponse,
-    UpdateConnectionResponse,
-    CreateExtensionResponse,
-    DeleteExtensionResponse,
-    GetExtensionResponse,
-    GetExtensionsResponse,
-    LoginResponse,
-    RequestTokenResponse,
-    UpdateExtensionResponse,
-    CreateGroupResponse,
-    DeleteGroupResponse,
-    GetGroupResponse,
-    GetGroupsResponse,
-    UpdateGroupResponse,
-    GetPermissionedResourceResponse,
-    GetPermissionedResourcesResponse,
-    GetResourceUsersResponse,
-    UpdatePermissionedResourceResponse,
-    CreateRoleResponse,
-    DeleteRoleResponse,
-    GetRoleResponse,
-    GetRolesResponse,
-    UpdateRoleResponse,
-    CreateClientResponse,
-    DeleteAccessKeyResponse,
-    DeleteClientResponse,
-    GetClientResponse,
-    GetClientsResponse,
-    RequestAccessKeyResponse,
-    UpdateClientResponse,
-    CreateTenantResponse,
-    DeleteTenantResponse,
-    GetTenantResponse,
-    GetTenantsResponse,
-    UpdateTenantResponse,
-    AuthorizeUserResponse,
-    GetUserPermissionsForResourceResponse,
-    GetUserResourcesResponse,
-    GetUserRolesForResourceResponse,
-    DeleteUserResponse,
-    GetUserResponse,
-    GetUsersResponse, ApiError,
-};
-use authress_local::server::MakeService;
-use std::error::Error;
 
 #[async_trait]
 impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
@@ -198,7 +137,19 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     {
         let context = context.clone();
         info!("create_record({:?}) - X-Span-ID: {:?}", access_record, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+
+        let record_id = access_record.record_id.unwrap_or(nanoid::nanoid!());
+        let stored_access_record = models::AccessRecord {
+            record_id: Some(record_id.clone()),
+            ..access_record
+        };
+        self.databases.records_db.insert(record_id.clone(), stored_access_record);
+
+        let result = self.databases.records_db.get(&record_id);
+        return Ok(CreateRecordResponse::Success {
+            body: serde_json::to_string(&*result.unwrap()).unwrap(),
+            last_modified: Some(chrono::offset::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true))
+        });
     }
 
     /// Create access request
