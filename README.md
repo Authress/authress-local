@@ -1,3 +1,8 @@
+
+<p align="center">
+    <img src="https://github.com/Authress/authress-local/assets/5056218/156e3881-b359-4810-bc96-7abeaf9ddbdb" height="400px" alt="Authress Media Banner">
+</p>
+
 # Authress Local
 
 Authress Local provides a local running version of an Authorization API in a container. Use Docker, Podman, Nomad or another container management solution to run authorization and authentication directly on your localhost.
