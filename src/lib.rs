@@ -552,7 +552,9 @@ pub enum CreateGroupResponse {
     Unauthorized
     ,
     /// Forbidden. The user doesn't have permission to create groups.
-    Forbidden
+    Forbidden,
+
+    GroupAlreadyExists
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
