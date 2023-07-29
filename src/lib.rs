@@ -65,13 +65,15 @@ pub enum CreateRecordResponse {
     {
         body: String,
         last_modified: Option<String>
-    }
-    ,
+    },
     /// Unauthorized. The request JWT found in the Authorization header is no longer valid.
-    Unauthorized
-    ,
+    Unauthorized,
     /// Forbidden. The user doesn't have permission to create records.
-    Forbidden
+    Forbidden,
+    /// The size of the record is larger than allowed. Recommended action is to create another record and retry the updates.
+    TheSizeOfTheRecordIsLargerThanAllowed,
+    /// AccessRecordAlreadyExists. There already exists an access record with this recordId.
+    AccessRecordAlreadyExists
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

@@ -503,9 +503,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -604,9 +604,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -710,8 +710,13 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     let body = body;
                                                     *response.body_mut() = Body::from(body);
                                                 },
-                                                CreateRecordResponse::Unauthorized
-                                                => {
+                                                CreateRecordResponse::TheSizeOfTheRecordIsLargerThanAllowed => {
+                                                    return Ok(Response::builder().status(StatusCode::PAYLOAD_TOO_LARGE).body(Body::from("The size of the access record is too large."))?);
+                                                },
+                                                CreateRecordResponse::AccessRecordAlreadyExists => {
+                                                    return Ok(Response::builder().status(StatusCode::CONFLICT).body(Body::from("Record already exists"))?);
+                                                },
+                                                CreateRecordResponse::Unauthorized => {
                                                     *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
                                                 },
                                                 CreateRecordResponse::Forbidden
@@ -724,9 +729,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -829,9 +834,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -913,9 +918,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -991,9 +996,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1069,9 +1074,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1173,9 +1178,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1305,9 +1310,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1390,9 +1395,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1504,9 +1509,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1627,9 +1632,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1718,9 +1723,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1882,9 +1887,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -1976,9 +1981,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2063,9 +2068,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2120,9 +2125,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2194,9 +2199,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2294,9 +2299,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2389,9 +2394,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2473,9 +2478,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2558,9 +2563,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2658,9 +2663,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2715,9 +2720,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2838,9 +2843,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -2939,9 +2944,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3023,9 +3028,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3108,9 +3113,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3165,9 +3170,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3308,9 +3313,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3393,9 +3398,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3522,9 +3527,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3623,9 +3628,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3707,9 +3712,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3792,9 +3797,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -3906,9 +3911,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4029,9 +4034,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4116,9 +4121,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4169,9 +4174,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4285,9 +4290,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4401,9 +4406,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4502,9 +4507,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4586,9 +4591,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4671,9 +4676,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4728,9 +4733,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4851,9 +4856,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -4948,9 +4953,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5047,9 +5052,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5125,9 +5130,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5206,9 +5211,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5302,9 +5307,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5387,9 +5392,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5510,9 +5515,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5611,9 +5616,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5695,9 +5700,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5780,9 +5785,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5837,9 +5842,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -5960,9 +5965,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6074,9 +6079,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6170,9 +6175,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6340,9 +6345,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6436,9 +6441,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6514,9 +6519,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6599,9 +6604,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
@@ -6731,9 +6736,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(_)) => {
+                                            Err(ApiError::UnknownApiError(error_message)) => {
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
                                             }
                                         }
 
