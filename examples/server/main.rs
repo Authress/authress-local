@@ -8,6 +8,8 @@ mod server;
 mod databases;
 
 use lazy_static::lazy_static;
+use log::info;
+use tokio::task;
 
 lazy_static! {
     pub static ref DATABASES: crate::databases::Databases = crate::databases::Databases::default();
@@ -19,13 +21,23 @@ lazy_static! {
 async fn main() {
     simple_logger::SimpleLogger::new().env().init().unwrap();
 
-    let matches = App::new("server")
+    ctrlc::set_handler(move || {
+        println!("Stopping Authress Local container.");
+        std::process::exit(0);
+    }).unwrap();
+
+    let task = task::spawn(async {
+        let matches = App::new("server")
         .arg(Arg::with_name("https")
             .long("https")
             .help("Whether to use HTTPS or not"))
         .get_matches();
 
-    let addr = "127.0.0.1:8888";
+        let addr = "0.0.0.0:8888";
 
-    server::create(addr, matches.is_present("https"), &DATABASES).await;
+        server::create(addr, matches.is_present("https"), &DATABASES).await;
+    });
+
+    info!("Authress Local is now running on localhost:8888");
+    task.await.unwrap();
 }

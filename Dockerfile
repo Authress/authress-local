@@ -1,18 +1,27 @@
-# FROM rust:1.71 as builder
-# ENV APP authress-local
-# WORKDIR /usr/src/$APP
-# COPY . .
-# RUN cargo install --path .
- 
-# FROM debian:bookworm
-# RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-# COPY --from=builder /usr/local/cargo/bin/$APP /usr/local/bin/authress-local
+FROM rust:1.71.0
 
-#####
-
-FROM debian:bookworm-slim
+LABEL org.opencontainers.image.authors="developers@authress.io"
 RUN apt-get update && apt-get install -y openssl curl procps && rm -rf /var/lib/apt/lists/*
-COPY ./target/release/examples/server /usr/local/bin/authress-local
 
-EXPOSE 8888/tcp
-CMD ["/usr/local/bin/authress-local"]
+WORKDIR /usr/src/authress-local
+COPY . .
+RUN cargo build --release --example server
+
+EXPOSE 8888
+CMD ["/usr/src/authress-local/target/release/examples/server"]
+
+# FROM rust:1.71.0 as builder
+
+# WORKDIR /usr/src/authress-local
+# COPY . .
+# RUN cargo build --release --example server
+
+# FROM rust:slim-bookworm
+
+# LABEL org.opencontainers.image.authors="developers@authress.io"
+
+# RUN apt-get update & apt-get install -y openssl curl procps & rm -rf /var/lib/apt/lists/*
+# COPY --from=builder /usr/src/authress-local/target/release/examples/server /usr/local/bin/authress-local
+
+# EXPOSE 8888
+# CMD ["/usr/local/bin/authress-local"]

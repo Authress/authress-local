@@ -11,6 +11,15 @@ cargo run --example server
 ```
 
 ## Build the container locally
+
+You'll need to first update your registeries to include docker.io if you haven't done that
+
+Add to your `/etc/containers/registries.conf` file:
+```
+[registries.search]
+registries = ['docker.io']
+```
+
 ```sh
 podman build -f Dockerfile -t authress-local
 podman run -it -p 8888:8888 localhost/authress-local:latest
@@ -20,6 +29,8 @@ podman run -it -p 8888:8888 localhost/authress-local:latest
 ```sh
 podman container ls
 podman container kill NAME
+podman container prune
+podman image prune
 ```
 
 ## Debug the container

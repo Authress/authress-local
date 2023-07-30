@@ -1,0 +1,1 @@
+rm -rf ./target  && podman build -f Dockerfile -t authress-local
