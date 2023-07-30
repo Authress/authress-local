@@ -13,7 +13,7 @@ Additionally, Authress local is great way to develop with Authress without needi
 
 <p align="center">
     <a href="https://github.com/Authress/authress-local/pkgs/container/authress-local" alt="Authress Local Container">
-        <img src="https://img.shields.io/badge/Container-ghcr.io%2Fauthress%2Fauthress--local-DC7100.svg">
+        <img src="https://img.shields.io/badge/Container-authress%2Fauthress--local-DC7100.svg">
     </a>
     <a href="https://github.com/Authress/authress-local/actions" alt="GitHub action status">
         <img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg">
@@ -33,7 +33,7 @@ Run the container locally:
 
 #### Docker
 ```sh
-docker pull ghcr.io/authress/authress-local:latest
+docker pull authress/authress-local:latest
 docker run -d -p 8888:8888 authress/authress-local:latest
 # Run in terminal: docker run -d -p 8888:8888 authress/authress-local:latest
 ```

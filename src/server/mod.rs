@@ -4504,6 +4504,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(403).expect("Unable to turn 403 into a StatusCode");
                                                 },
+                                                CreateRoleResponse::RoleAlreadyExists => {
+                                                    return Ok(Response::builder().status(StatusCode::CONFLICT).body(Body::from("Role already exists"))?);       
+                                                }
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;

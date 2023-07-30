@@ -536,40 +536,76 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /* ROLE MANAGEMENT */
 
-    /// Create role
-    async fn create_role(&self, role: Role,context: &C) -> Result<CreateRoleResponse, ApiError> {
+    
+    // Create role
+    async fn create_role(&self, role: Role, context: &C) -> Result<CreateRoleResponse,ApiError> {
         let context = context.clone();
         info!("create_role({:?}) - X-Span-ID: {:?}", role, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
-    }
+    
+        if !role.role_id.starts_with("ro_") {
+            return Err(ApiError::UnknownApiError("Role IDs must start with the prefix ro_".to_string()));
+        }
 
-    /// Deletes role
-    async fn delete_role(&self, role_id: String,context: &C) -> Result<DeleteRoleResponse, ApiError> {
-        let context = context.clone();
-        info!("delete_role(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        let role_id = role.role_id.clone();
+        let mut database = self.databases.roles_db.lock().unwrap();
+        let result = database.get(&role_id);
+        if let Some(_) = result {
+            return Ok(CreateRoleResponse::RoleAlreadyExists);
+        }
+        
+        database.insert(role_id.to_string(), role.clone());
+    
+        let result = database.get(&role_id);
+        return Ok(CreateRoleResponse::Success(serde_json::to_string(&*result.unwrap()).unwrap()));
     }
-
+    
     /// Retrieve role
     async fn get_role(&self, role_id: String,context: &C) -> Result<GetRoleResponse, ApiError> {
         let context = context.clone();
         info!("get_role(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        let database = self.databases.roles_db.lock().unwrap();
+        let result = database.get(&role_id);
+        if let Some(existing_role) = result {
+            return Ok(GetRoleResponse::Success(serde_json::to_string(&*existing_role).unwrap()));
+        }
+    
+        return Ok(GetRoleResponse::NotFound);
     }
-
+    
     /// List roles
-    async fn get_roles(&self, context: &C) -> Result<GetRolesResponse,ApiError> {
+    async fn get_roles(&self, context: &C) -> Result<GetRolesResponse, ApiError> {
         let context = context.clone();
         info!("get_roles() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        let database = self.databases.roles_db.lock().unwrap();
+        let roles = database.values().cloned().collect::<Vec<Role>>();
+        return Ok(GetRolesResponse::Success(serde_json::to_string(&*roles).unwrap()));
     }
-
+    
     /// Update role
-    async fn update_role(&self, role_id: String,role: Role,
-        context: &C) -> Result<UpdateRoleResponse, ApiError> {
+    async fn update_role(&self, role_id: String, role: Role, context: &C) -> Result<UpdateRoleResponse, ApiError> {
         let context = context.clone();
         info!("update_role(\"{}\", {:?}) - X-Span-ID: {:?}", role_id, role, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        let mut database = self.databases.roles_db.lock().unwrap();
+        let result = database.get(&role_id);
+        if let None = result {
+            return Ok(UpdateRoleResponse::NotFound);
+        }
+    
+        database.insert(role_id.to_string(), role.clone());
+        return Ok(UpdateRoleResponse::Success(serde_json::to_string(&role).unwrap()));
+    }
+    
+    /// Deletes role
+    async fn delete_role(&self, role_id: String,context: &C) -> Result<DeleteRoleResponse, ApiError> {
+        let context = context.clone();
+        info!("delete_record(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
+        
+        let mut database = self.databases.roles_db.lock().unwrap();
+        database.remove(&role_id);
+        return Ok(DeleteRoleResponse::Success);
     }
 
     /* ********************************* */
@@ -630,36 +666,63 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /* USER PERMISSIONS */
 
     /// Verify user authorization
-    async fn authorize_user(&self, user_id: String,resource_uri: String,
-        permission: String,
-        context: &C) -> Result<AuthorizeUserResponse, ApiError> {
+    async fn authorize_user(&self, user_id: String,resource_uri: String, permission: String, context: &C) -> Result<AuthorizeUserResponse, ApiError> {
         let context = context.clone();
         info!("authorize_user({:?}, \"{}\", {:?}) - X-Span-ID: {:?}", user_id, resource_uri, permission, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        return Ok(AuthorizeUserResponse::Success);
     }
 
     /// Get user permissions for resource
-    async fn get_user_permissions_for_resource(&self, user_id: String,resource_uri: String,
-        context: &C) -> Result<GetUserPermissionsForResourceResponse, ApiError> {
+    async fn get_user_permissions_for_resource(&self, user_id: String, resource_uri: String, context: &C) -> Result<GetUserPermissionsForResourceResponse, ApiError> {
         let context = context.clone();
         info!("get_user_permissions_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        let permission_collection = PermissionCollection {
+            permissions: vec![PermissionObject { action: "*".to_string(), allow: true, grant: true, delegate: true, ..Default::default() } ],
+            ..Default::default()
+        };
+        return Ok(GetUserPermissionsForResourceResponse::Success(serde_json::to_string(&permission_collection).unwrap()));
     }
 
     /// List user resources
-    async fn get_user_resources(&self, user_id: String,resource_uri: Option<String>, collection_configuration: Option<String>, permissions: Option<String>, limit: Option<i32>, cursor: Option<String>,
+    async fn get_user_resources(&self, user_id: String, resource_uri: Option<String>, collection_configuration: Option<String>, permissions: Option<String>, limit: Option<i32>, cursor: Option<String>,
         context: &C) -> Result<GetUserResourcesResponse, ApiError> {
 
         let context = context.clone();
         info!("get_user_resources({:?}, {:?}, {:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", user_id, resource_uri, collection_configuration, permissions, limit, cursor, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        let database = self.databases.records_db.lock().unwrap();
+        let records = database.values().cloned().collect::<Vec<AccessRecord>>();
+
+        let user_resources_collection = UserResourcesCollection {
+            user_id,
+            resources: Some(records
+                .into_iter().map(|record| record.statements
+                    .into_iter().map(|statement| statement.resources
+                        .into_iter().map(|resource| resource.resource_uri)
+                        .collect::<Vec<String>>()
+                    ).collect::<Vec<Vec<String>>>()
+                ).collect::<Vec<Vec<Vec<String>>>>().into_iter().flatten().flatten().map(|resource_uri| Resource { resource_uri: resource_uri }).collect()),
+            ..Default::default()
+        };
+
+        return Ok(GetUserResourcesResponse::Success(serde_json::to_string(&user_resources_collection).unwrap()));
     }
 
     /// Get user roles for resource
     async fn get_user_roles_for_resource(&self, user_id: String,resource_uri: String, context: &C) -> Result<GetUserRolesForResourceResponse, ApiError> {
         let context = context.clone();
         info!("get_user_roles_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+        
+        let database = self.databases.roles_db.lock().unwrap();
+        let roles = database.values().cloned().collect::<Vec<Role>>();
+        
+        let role_collection = UserRoleCollection {
+            roles: roles.into_iter().map(|role| UserRole { role_id: role.role_id, ..Default::default() }).collect::<Vec<UserRole>>(),
+            ..Default::default()
+        };
+        return Ok(GetUserRolesForResourceResponse::Success(serde_json::to_string(&role_collection).unwrap()));
     }
 
     /* ********************************* */

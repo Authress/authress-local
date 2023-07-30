@@ -684,7 +684,9 @@ pub enum CreateRoleResponse {
     Unauthorized
     ,
     /// Forbidden. The user doesn't have permission to the role, but they have other permissions to the same account.
-    Forbidden
+    Forbidden,
+
+    RoleAlreadyExists
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

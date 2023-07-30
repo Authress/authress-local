@@ -74,9 +74,9 @@ dependencies = [
 
 [[package]]
 name = "authress"
-version = "0.1.44"
+version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cac39cff48f74daf98e54344f039c98b414646c5ed89feabddfd29a08609a85"
+checksum = "d6e8ce5671fd21a08448f82148a0975a06589050707c3b86d291fb931a378dde"
 dependencies = [
  "reqwest",
  "serde",
