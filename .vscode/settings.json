@@ -3,7 +3,8 @@
         "chrono",
         "Permissioned",
         "RESOURCEURI",
-        "rustup"
+        "rustup",
+        "accidentally"
     ],
     "cSpell.ignoreRegExpList": ["[a-z]+ID"]
 }

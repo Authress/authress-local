@@ -101,6 +101,15 @@ Implementation not yet available. Please file a ticket at https://github.com/Aut
 ************************************************************************************************************
 ************************************************************************************************************\n";
 
+pub const CREATE_AN_AUTHRESS_ACCOUNT: &str = "
+************************************************************************************************************
+************************************************************************************************************
+
+To use Authress Local in production, first create a free Authress account at: https://authress.io.
+
+************************************************************************************************************
+************************************************************************************************************\n";
+
 mod paths {
     use lazy_static::lazy_static;
 
@@ -411,8 +420,19 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
         let (method, uri, headers) = (parts.method, parts.uri, parts.headers);
         let path = paths::GLOBAL_REGEX_SET.matches(uri.path());
 
-        match method {
+        // Protect developers from accidentally using Authress Local in production
+        let host_header = headers.get(HeaderName::from_static("host"));
 
+        if let Some(header_value) = host_header {
+            // if let header_values = header::IntoHeaderValue::<String>::try_from((*header_value).clone()) {
+            if !header_value.is_empty() && header_value.to_str().unwrap() != "localhost:8888" {
+                let host_value = header_value.to_str().unwrap();
+                info!("The Host header '{}' was found with the request. To use Authress Local in production, first create a free Authress account at: https://authress.io.", host_value);
+                return Ok(Response::builder().status(StatusCode::IM_A_TEAPOT).body(Body::from(CREATE_AN_AUTHRESS_ACCOUNT))?);
+            }
+        };
+
+        match method {
             // CreateClaim - POST /v1/claims
             hyper::Method::POST if path.matched(paths::ID_V1_CLAIMS) => {
                 {
