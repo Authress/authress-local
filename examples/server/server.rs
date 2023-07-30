@@ -108,14 +108,14 @@ impl<C> Server<C> {
 impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 {
     /// Create resource Claim
-    async fn create_claim(&self, claim_request: ClaimRequest, context: &C) -> Result<CreateClaimResponse,ApiError> {
+    async fn create_claim(&self, claim_request: ClaimRequest, context: &C) -> Result<CreateClaimResponse, ApiError> {
         let context = context.clone();
         info!("create_claim({:?}) - X-Span-ID: {:?}", claim_request, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create user invite
-    async fn create_invite(&self, invite: Invite, context: &C) -> Result<CreateInviteResponse,ApiError> {
+    async fn create_invite(&self, invite: Invite, context: &C) -> Result<CreateInviteResponse, ApiError> {
         let context = context.clone();
         info!("create_invite({:?}) - X-Span-ID: {:?}", invite, context.get().0.clone());
         
@@ -136,7 +136,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// Create access record
-    async fn create_record(&self, access_record: AccessRecord, context: &C) -> Result<CreateRecordResponse,ApiError> {
+    async fn create_record(&self, access_record: AccessRecord, context: &C) -> Result<CreateRecordResponse, ApiError> {
         let context = context.clone();
         info!("create_record({:?}) - X-Span-ID: {:?}", access_record, context.get().0.clone());
 
@@ -275,7 +275,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// List linked external providers
-    async fn get_account_identities(&self, context: &C) -> Result<GetAccountIdentitiesResponse,ApiError> {
+    async fn get_account_identities(&self, context: &C) -> Result<GetAccountIdentitiesResponse, ApiError> {
         let context = context.clone();
         info!("get_account_identities() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
@@ -307,7 +307,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// List tenants
-    async fn get_tenants(&self, context: &C) -> Result<GetTenantsResponse,ApiError> {
+    async fn get_tenants(&self, context: &C) -> Result<GetTenantsResponse, ApiError> {
         let context = context.clone();
         info!("get_tenants() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
@@ -349,7 +349,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// List SSO connections
-    async fn get_connections(&self, context: &C) -> Result<GetConnectionsResponse,ApiError> {
+    async fn get_connections(&self, context: &C) -> Result<GetConnectionsResponse, ApiError> {
         let context = context.clone();
         info!("get_connections() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
@@ -384,7 +384,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// List extensions
-    async fn get_extensions(&self, context: &C) -> Result<GetExtensionsResponse,ApiError> {
+    async fn get_extensions(&self, context: &C) -> Result<GetExtensionsResponse, ApiError> {
         let context = context.clone();
         info!("get_extensions() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
@@ -422,7 +422,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /* GROUP MANAGEMENT */
 
-    async fn create_group(&self, group: Group, context: &C) -> Result<CreateGroupResponse,ApiError> {
+    async fn create_group(&self, group: Group, context: &C) -> Result<CreateGroupResponse, ApiError> {
         let context = context.clone();
         info!("create_group({:?}) - X-Span-ID: {:?}", group, context.get().0.clone());
     
@@ -512,7 +512,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// List all resource configurations
-    async fn get_permissioned_resources(&self, context: &C) -> Result<GetPermissionedResourcesResponse,ApiError> {
+    async fn get_permissioned_resources(&self, context: &C) -> Result<GetPermissionedResourcesResponse, ApiError> {
         let context = context.clone();
         info!("get_permissioned_resources() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
@@ -538,7 +538,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     
     // Create role
-    async fn create_role(&self, role: Role, context: &C) -> Result<CreateRoleResponse,ApiError> {
+    async fn create_role(&self, role: Role, context: &C) -> Result<CreateRoleResponse, ApiError> {
         let context = context.clone();
         info!("create_role({:?}) - X-Span-ID: {:?}", role, context.get().0.clone());
     
@@ -692,18 +692,23 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         let context = context.clone();
         info!("get_user_resources({:?}, {:?}, {:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", user_id, resource_uri, collection_configuration, permissions, limit, cursor, context.get().0.clone());
         
-        let database = self.databases.records_db.lock().unwrap();
-        let records = database.values().cloned().collect::<Vec<AccessRecord>>();
+        // let database = self.databases.records_db.lock().unwrap();
+        // let records = database.values().cloned().collect::<Vec<AccessRecord>>();
+        // let user_resources_collection = UserResourcesCollection {
+        //     user_id,
+        //     resources: Some(records
+        //         .into_iter().map(|record| record.statements
+        //             .into_iter().map(|statement| statement.resources
+        //                 .into_iter().map(|resource| resource.resource_uri)
+        //                 .collect::<Vec<String>>()
+        //             ).collect::<Vec<Vec<String>>>()
+        //         ).collect::<Vec<Vec<Vec<String>>>>().into_iter().flatten().flatten().map(|resource_uri| Resource { resource_uri: resource_uri }).collect()),
+        //     ..Default::default()
+        // };
 
         let user_resources_collection = UserResourcesCollection {
             user_id,
-            resources: Some(records
-                .into_iter().map(|record| record.statements
-                    .into_iter().map(|statement| statement.resources
-                        .into_iter().map(|resource| resource.resource_uri)
-                        .collect::<Vec<String>>()
-                    ).collect::<Vec<Vec<String>>>()
-                ).collect::<Vec<Vec<Vec<String>>>>().into_iter().flatten().flatten().map(|resource_uri| Resource { resource_uri: resource_uri }).collect()),
+            resources: Some(vec![Resource{ resource_uri: resource_uri.unwrap_or("*".to_string()) }]),
             ..Default::default()
         };
 
@@ -711,7 +716,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     }
 
     /// Get user roles for resource
-    async fn get_user_roles_for_resource(&self, user_id: String,resource_uri: String, context: &C) -> Result<GetUserRolesForResourceResponse, ApiError> {
+    async fn get_user_roles_for_resource(&self, user_id: String, resource_uri: String, context: &C) -> Result<GetUserRolesForResourceResponse, ApiError> {
         let context = context.clone();
         info!("get_user_roles_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
         
