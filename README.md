@@ -28,6 +28,9 @@ Additionally, Authress local is great way to develop with Authress without needi
 
 <hr>
 
+## Documentation
+* [Full container documentation](https://authress.io/knowledge-base/docs/SDKs/authress-local)
+
 ## Usage
 Run the container locally:
 
