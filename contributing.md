@@ -12,7 +12,7 @@ cargo run --example server
 
 ## Build the container locally
 
-You'll need to first update your registeries to include docker.io if you haven't done that
+You'll need to first update your registries to include docker.io if you haven't done that
 
 Add to your `/etc/containers/registries.conf` file:
 ```

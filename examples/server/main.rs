@@ -2,8 +2,6 @@
 
 #![allow(missing_docs)]
 
-use clap::{App, Arg};
-
 mod server;
 mod databases;
 
@@ -27,15 +25,8 @@ async fn main() {
     }).unwrap();
 
     let task = task::spawn(async {
-        let matches = App::new("server")
-        .arg(Arg::with_name("https")
-            .long("https")
-            .help("Whether to use HTTPS or not"))
-        .get_matches();
-
         let addr = "0.0.0.0:8888";
-
-        server::create(addr, matches.is_present("https"), &DATABASES).await;
+        server::create(addr, &DATABASES).await;
     });
 
     info!("Authress Local is now running on localhost:8888");

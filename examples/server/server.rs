@@ -19,9 +19,6 @@ use swagger::auth::MakeAllowAllAuthenticator;
 use swagger::EmptyContext;
 use tokio::net::TcpListener;
 
-#[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
-use openssl::ssl::{Ssl, SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
-
 // use crate::models;
 use authress::models::*;
 
@@ -31,8 +28,7 @@ use std::error::Error;
 
 use crate::databases::{Databases, self};
 
-/// Builds an SSL implementation for Simple HTTPS from some hard-coded file names
-pub async fn create(addr: &str, https: bool, databases: &'static Databases) {
+pub async fn create(addr: &str, databases: &'static Databases) {
     let addr = addr.parse().expect("Failed to parse bind address");
 
     let server = Server::new(&databases);
@@ -47,46 +43,48 @@ pub async fn create(addr: &str, https: bool, databases: &'static Databases) {
             service
         );
 
-    if https {
-        #[cfg(any(target_os = "macos", target_os = "windows", target_os = "ios"))]
-        {
-            unimplemented!("SSL is not implemented for the examples on MacOS, Windows or iOS");
-        }
+    // if https {
+    //     #[cfg(any(target_os = "macos", target_os = "windows", target_os = "ios"))]
+    //     {
+    //         unimplemented!("SSL is not implemented for the examples on MacOS, Windows or iOS");
+    //     }
 
-        #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
-        {
-            let mut ssl = SslAcceptor::mozilla_intermediate_v5(SslMethod::tls()).expect("Failed to create SSL Acceptor");
+    //     #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
+    //     {
+    //         let mut ssl = SslAcceptor::mozilla_intermediate_v5(SslMethod::tls()).expect("Failed to create SSL Acceptor");
 
-            // Server authentication
-            ssl.set_private_key_file("examples/server-key.pem", SslFiletype::PEM).expect("Failed to set private key");
-            ssl.set_certificate_chain_file("examples/server-chain.pem").expect("Failed to set certificate chain");
-            ssl.check_private_key().expect("Failed to check private key");
+    //         // Server authentication
+    //         ssl.set_private_key_file("examples/server-key.pem", SslFiletype::PEM).expect("Failed to set private key");
+    //         ssl.set_certificate_chain_file("examples/server-chain.pem").expect("Failed to set certificate chain");
+    //         ssl.check_private_key().expect("Failed to check private key");
 
-            let tls_acceptor = ssl.build();
-            let tcp_listener = TcpListener::bind(&addr).await.unwrap();
+    //         let tls_acceptor = ssl.build();
+    //         let tcp_listener = TcpListener::bind(&addr).await.unwrap();
 
-            loop {
-                if let Ok((tcp, _)) = tcp_listener.accept().await {
-                    let ssl = Ssl::new(tls_acceptor.context()).unwrap();
-                    let addr = tcp.peer_addr().expect("Unable to get remote address");
-                    let service = service.call(addr);
+    //         loop {
+    //             if let Ok((tcp, _)) = tcp_listener.accept().await {
+    //                 let ssl = Ssl::new(tls_acceptor.context()).unwrap();
+    //                 let addr = tcp.peer_addr().expect("Unable to get remote address");
+    //                 let service = service.call(addr);
 
-                    tokio::spawn(async move {
-                        let tls = tokio_openssl::SslStream::new(ssl, tcp).map_err(|_| ())?;
-                        let service = service.await.map_err(|_| ())?;
+    //                 tokio::spawn(async move {
+    //                     let tls = tokio_openssl::SslStream::new(ssl, tcp).map_err(|_| ())?;
+    //                     let service = service.await.map_err(|_| ())?;
 
-                        Http::new()
-                            .serve_connection(tls, service)
-                            .await
-                            .map_err(|_| ())
-                    });
-                }
-            }
-        }
-    } else {
-        // Using HTTP
-        hyper::server::Server::bind(&addr).serve(service).await.unwrap()
-    }
+    //                     Http::new()
+    //                         .serve_connection(tls, service)
+    //                         .await
+    //                         .map_err(|_| ())
+    //                 });
+    //             }
+    //         }
+    //     }
+    // } else {
+    //     // Using HTTP
+    //     hyper::server::Server::bind(&addr).serve(service).await.unwrap()
+    // }
+
+    hyper::server::Server::bind(&addr).serve(service).await.unwrap();
 }
 
 #[derive(Copy, Clone)]
