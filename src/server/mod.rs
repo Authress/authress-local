@@ -6810,7 +6810,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             _ if path.matched(paths::ID_V1_USERS_USERID_RESOURCES_RESOURCEURI_PERMISSIONS_PERMISSION) => method_not_allowed(),
             _ if path.matched(paths::ID_V1_USERS_USERID_RESOURCES_RESOURCEURI_ROLES) => method_not_allowed(),
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
-                    .body(Body::empty())
+                    .body(Body::from("No endpoint exists at the specified url."))
                     .expect("Unable to create Not Found response"))
         }
     } Box::pin(run(self.api_impl.clone(), req)) }
