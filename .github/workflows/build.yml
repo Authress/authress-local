@@ -29,10 +29,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - run: rustup update stable && rustup default stable
-      - run: cargo -V
-      - run: cargo build --release --example server # --verbose --frozen
-      - run: cargo test --verbose
+      - name: Setup
+        run: |
+          rustup update stable && rustup default stable
+          cargo -V
+      - name: Build
+        # Make sure to remove the temporary built artifacts so that don't end up in the container causing container build to take longer
+        run: |
+          cargo build --release --example server # --verbose --frozen
+          cargo test --verbose
+          rm -rf ./target
 
       - name: Create Github Release and Tag
         if: github.repository_owner == 'Authress' && github.event_name == 'push'
