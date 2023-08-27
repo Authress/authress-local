@@ -1,10 +1,11 @@
 {
     "cSpell.words": [
+        "accidentally",
         "chrono",
+        "localstack",
         "Permissioned",
         "RESOURCEURI",
-        "rustup",
-        "accidentally"
+        "rustup"
     ],
     "cSpell.ignoreRegExpList": ["[a-z]+ID"]
 }
