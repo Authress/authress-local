@@ -12,18 +12,10 @@ Authress local stands up an API that offers parity with the [Authress Authorizat
 Additionally, Authress local is great way to develop with Authress without needing to have an Authress account.
 
 <p align="center">
-    <a href="https://github.com/Authress/authress-local/pkgs/container/authress-local" alt="Authress Local Container">
-        <img src="https://img.shields.io/badge/Container-authress%2Fauthress--local-DC7100.svg">
-    </a>
-    <a href="https://github.com/Authress/authress-local/actions" alt="GitHub action status">
-        <img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg">
-    </a>
-    <a href="./LICENSE" alt="agpl-3.0 license">
-      <img src="https://img.shields.io/badge/License-AGPL3.0-blue.svg">
-    </a>
-    <a href="https://authress.io/community" alt="authress community">
-      <img src="https://img.shields.io/badge/Community-Authress-fbaf0b.svg">
-    </a>
+    <a href="https://github.com/Authress/authress-local/pkgs/container/authress-local" alt="Authress Local Container"><img src="https://img.shields.io/badge/Container-authress%2Fauthress--local-DC7100.svg"></a>
+    <a href="https://github.com/Authress/authress-local/actions" alt="GitHub action status"><img src="https://github.com/authress/authress-local/actions/workflows/build.yml/badge.svg"></a>
+    <a href="./LICENSE" alt="agpl-3.0 license"><img src="https://img.shields.io/badge/License-AGPL3.0-blue.svg"></a>
+    <a href="https://authress.io/community" alt="authress community"><img src="https://img.shields.io/badge/Community-Authress-fbaf0b.svg"></a>
 </p>
 
 <hr>
