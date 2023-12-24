@@ -5,7 +5,7 @@
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
-use authentication::{LoginResponse, RequestTokenResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationResponse, AuthenticationRequest};
+use authentication::*;
 use authress::models::*;
 use futures::Stream;
 use log::*;
