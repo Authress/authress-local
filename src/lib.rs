@@ -5,7 +5,7 @@
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
-use authentication::{LoginResponse, RequestTokenResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationResponse};
+use authentication::{LoginResponse, RequestTokenResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationResponse, AuthenticationRequest};
 use authress::models::*;
 use futures::Stream;
 use log::*;
@@ -1214,6 +1214,7 @@ pub trait Api<C: Send + Sync> {
     async fn authenticate(
         &self,
         host_value: &str,
+        authentication_request: AuthenticationRequest,
         context: &C) -> Result<AuthenticationResponse, ApiError>;
     
     /// Open ID Configuration
@@ -1230,7 +1231,7 @@ pub trait Api<C: Send + Sync> {
     /// OAuth Token
     async fn request_token(
         &self,
-        o_auth_token_request: OAuthTokenRequest,
+        host_value: &str,
         context: &C) -> Result<RequestTokenResponse, ApiError>;
 
     /// Update extension
@@ -1460,541 +1461,62 @@ pub trait Api<C: Send + Sync> {
 
 }
 
-/// API where `Context` isn't passed on every API call
-#[async_trait]
-#[allow(clippy::too_many_arguments, clippy::ptr_arg)]
-pub trait ApiNoContext<C: Send + Sync> {
-
-    fn poll_ready(&self, _cx: &mut Context) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>>;
-
-    fn context(&self) -> &C;
-
-    /// Create resource Claim
-    async fn create_claim(
-        &self,
-        claim_request: ClaimRequest,
-        ) -> Result<CreateClaimResponse, ApiError>;
-
-    /// Create user invite
-    async fn create_invite(
-        &self,
-        invite: Invite,
-        ) -> Result<CreateInviteResponse, ApiError>;
-
-    /// Create access record
-    async fn create_record(
-        &self,
-        access_record: AccessRecord,
-        ) -> Result<CreateRecordResponse, ApiError>;
-
-    /// Create access request
-    async fn create_request(
-        &self,
-        access_request: AccessRequest,
-        ) -> Result<CreateRequestResponse, ApiError>;
-
-    /// Delete invite
-    async fn delete_invite(
-        &self,
-        invite_id: String,
-        ) -> Result<DeleteInviteResponse, ApiError>;
-
-    /// Deletes access record
-    async fn delete_record(
-        &self,
-        record_id: String,
-        ) -> Result<DeleteRecordResponse, ApiError>;
-
-    /// Deletes access request
-    async fn delete_request(
-        &self,
-        request_id: String,
-        ) -> Result<DeleteRequestResponse, ApiError>;
-
-    /// Retrieve access record
-    async fn get_record(
-        &self,
-        record_id: String,
-        ) -> Result<GetRecordResponse, ApiError>;
-
-    /// List access records
-    async fn get_records(
-        &self,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        filter: Option<String>,
-        status: Option<String>,
-        ) -> Result<GetRecordsResponse, ApiError>;
-
-    /// Retrieve access request
-    async fn get_request(
-        &self,
-        request_id: String,
-        ) -> Result<GetRequestResponse, ApiError>;
-
-    /// List access requests
-    async fn get_requests(
-        &self,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        status: Option<String>,
-        ) -> Result<GetRequestsResponse, ApiError>;
-
-    /// Approve or deny access request
-    async fn respond_to_access_request(
-        &self,
-        request_id: String,
-        access_request_response: AccessRequestResponse,
-        ) -> Result<RespondToAccessRequestResponse, ApiError>;
-
-    /// Accept invite
-    async fn respond_to_invite(
-        &self,
-        invite_id: String,
-        ) -> Result<RespondToInviteResponse, ApiError>;
-
-    /// Update access record
-    async fn update_record(
-        &self,
-        record_id: String,
-        access_record: AccessRecord,
-        if_unmodified_since: Option<String>,
-        ) -> Result<UpdateRecordResponse, ApiError>;
-
-    /// Link external provider
-    async fn delegate_authentication(
-        &self,
-        identity_request: IdentityRequest,
-        ) -> Result<DelegateAuthenticationResponse, ApiError>;
-
-    /// Retrieve account information
-    async fn get_account(
-        &self,
-        account_id: String,
-        ) -> Result<GetAccountResponse, ApiError>;
-
-    /// List linked external providers
-    async fn get_account_identities(
-        &self,
-        ) -> Result<GetAccountIdentitiesResponse, ApiError>;
-
-    /// List user Authress accounts
-    async fn get_accounts(
-        &self,
-        earliest_cache_time: Option<chrono::DateTime::<chrono::Utc>>,
-        ) -> Result<GetAccountsResponse, ApiError>;
-
-    /// Log user into third-party application
-    async fn delegate_user_login(
-        &self,
-        application_id: String,
-        user_id: String,
-        ) -> Result<DelegateUserLoginResponse, ApiError>;
-
-    /// Create SSO connection
-    async fn create_connection(
-        &self,
-        connection: Connection,
-        ) -> Result<CreateConnectionResponse, ApiError>;
-
-    /// Delete SSO connection
-    async fn delete_connection(
-        &self,
-        connection_id: String,
-        ) -> Result<DeleteConnectionResponse, ApiError>;
-
-    /// Retrieve SSO connection
-    async fn get_connection(
-        &self,
-        connection_id: String,
-        ) -> Result<GetConnectionResponse, ApiError>;
-
-    /// Retrieve user connection credentials
-    async fn get_connection_credentials(
-        &self,
-        connection_id: String,
-        user_id: String,
-        ) -> Result<GetConnectionCredentialsResponse, ApiError>;
-
-    /// List SSO connections
-    async fn get_connections(
-        &self,
-        ) -> Result<GetConnectionsResponse, ApiError>;
-
-    /// Update SSO connection
-    async fn update_connection(
-        &self,
-        connection_id: String,
-        connection: Connection,
-        ) -> Result<UpdateConnectionResponse, ApiError>;
-
-    /// Create extension
-    async fn create_extension(
-        &self,
-        extension: Extension,
-        ) -> Result<CreateExtensionResponse, ApiError>;
-
-    /// Delete extension
-    async fn delete_extension(
-        &self,
-        extension_id: String,
-        ) -> Result<DeleteExtensionResponse, ApiError>;
-
-    /// Retrieve extension
-    async fn get_extension(
-        &self,
-        extension_id: String,
-        ) -> Result<GetExtensionResponse, ApiError>;
-
-    /// List extensions
-    async fn get_extensions(
-        &self,
-        ) -> Result<GetExtensionsResponse, ApiError>;
-
-    /// OAuth Authorize
-    async fn login(
-        &self,
-        client_id: String,
-        code_challenge: String,
-        redirect_uri: String,
-        code_challenge_method: Option<String>,
-        ) -> Result<LoginResponse, ApiError>;
-
-    /// OAuth Token
-    async fn request_token(
-        &self,
-        o_auth_token_request: OAuthTokenRequest,
-        ) -> Result<RequestTokenResponse, ApiError>;
-
-    /// Update extension
-    async fn update_extension(
-        &self,
-        extension_id: String,
-        extension: Extension,
-        ) -> Result<UpdateExtensionResponse, ApiError>;
-
-    /// Create group
-    async fn create_group(
-        &self,
-        group: Group,
-        ) -> Result<CreateGroupResponse, ApiError>;
-
-    /// Deletes group
-    async fn delete_group(
-        &self,
-        group_id: String,
-        ) -> Result<DeleteGroupResponse, ApiError>;
-
-    /// Retrieve group
-    async fn get_group(
-        &self,
-        group_id: String,
-        ) -> Result<GetGroupResponse, ApiError>;
-
-    /// List groups
-    async fn get_groups(
-        &self,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        filter: Option<String>,
-        ) -> Result<GetGroupsResponse, ApiError>;
-
-    /// Update a group
-    async fn update_group(
-        &self,
-        group_id: String,
-        group: Group,
-        ) -> Result<UpdateGroupResponse, ApiError>;
-
-    /// Retrieve resource configuration
-    async fn get_permissioned_resource(
-        &self,
-        resource_uri: String,
-        ) -> Result<GetPermissionedResourceResponse, ApiError>;
-
-    /// List all resource configurations
-    async fn get_permissioned_resources(
-        &self,
-        ) -> Result<GetPermissionedResourcesResponse, ApiError>;
-
-    /// List users with resource access
-    async fn get_resource_users(
-        &self,
-        resource_uri: String,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        ) -> Result<GetResourceUsersResponse, ApiError>;
-
-    /// Update resource configuration
-    async fn update_permissioned_resource(
-        &self,
-        resource_uri: String,
-        permissioned_resource: PermissionedResource,
-        ) -> Result<UpdatePermissionedResourceResponse, ApiError>;
-
-    /// Create role
-    async fn create_role(
-        &self,
-        role: Role,
-        ) -> Result<CreateRoleResponse, ApiError>;
-
-    /// Deletes role
-    async fn delete_role(
-        &self,
-        role_id: String,
-        ) -> Result<DeleteRoleResponse, ApiError>;
-
-    /// Retrieve role
-    async fn get_role(
-        &self,
-        role_id: String,
-        ) -> Result<GetRoleResponse, ApiError>;
-
-    /// List roles
-    async fn get_roles(
-        &self,
-        ) -> Result<GetRolesResponse, ApiError>;
-
-    /// Update role
-    async fn update_role(
-        &self,
-        role_id: String,
-        role: Role,
-        ) -> Result<UpdateRoleResponse, ApiError>;
-
-    /// Create service client
-    async fn create_client(
-        &self,
-        client: Client,
-        ) -> Result<CreateClientResponse, ApiError>;
-
-    /// Delete service client access key
-    async fn delete_access_key(
-        &self,
-        client_id: String,
-        key_id: String,
-        ) -> Result<DeleteAccessKeyResponse, ApiError>;
-
-    /// Delete service client
-    async fn delete_client(
-        &self,
-        client_id: String,
-        ) -> Result<DeleteClientResponse, ApiError>;
-
-    /// Retrieve service client
-    async fn get_client(
-        &self,
-        client_id: String,
-        ) -> Result<GetClientResponse, ApiError>;
-
-    /// List service clients
-    async fn get_clients(
-        &self,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        ) -> Result<GetClientsResponse, ApiError>;
-
-    /// Generate service client access key
-    async fn request_access_key(
-        &self,
-        client_id: String,
-        ) -> Result<RequestAccessKeyResponse, ApiError>;
-
-    /// Update service client
-    async fn update_client(
-        &self,
-        client_id: String,
-        client: Client,
-        ) -> Result<UpdateClientResponse, ApiError>;
-
-    /// Create tenant
-    async fn create_tenant(
-        &self,
-        tenant: Tenant,
-        ) -> Result<CreateTenantResponse, ApiError>;
-
-    /// Delete tenant
-    async fn delete_tenant(
-        &self,
-        tenant_id: String,
-        ) -> Result<DeleteTenantResponse, ApiError>;
-
-    /// Retrieve tenant
-    async fn get_tenant(
-        &self,
-        tenant_id: String,
-        ) -> Result<GetTenantResponse, ApiError>;
-
-    /// List tenants
-    async fn get_tenants(
-        &self,
-        ) -> Result<GetTenantsResponse, ApiError>;
-
-    /// Update tenant
-    async fn update_tenant(
-        &self,
-        tenant_id: String,
-        tenant: Tenant,
-        ) -> Result<UpdateTenantResponse, ApiError>;
-
-    /// Verify user authorization
-    async fn authorize_user(
-        &self,
-        user_id: String,
-        resource_uri: String,
-        permission: String,
-        ) -> Result<AuthorizeUserResponse, ApiError>;
-
-    /// Get user permissions for resource
-    async fn get_user_permissions_for_resource(
-        &self,
-        user_id: String,
-        resource_uri: String,
-        ) -> Result<GetUserPermissionsForResourceResponse, ApiError>;
-
-    /// List user resources
-    async fn get_user_resources(
-        &self,
-        user_id: String,
-        resource_uri: Option<String>,
-        collection_configuration: Option<String>,
-        permissions: Option<String>,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        ) -> Result<GetUserResourcesResponse, ApiError>;
-
-    /// Get user roles for resource
-    async fn get_user_roles_for_resource(
-        &self,
-        user_id: String,
-        resource_uri: String,
-        ) -> Result<GetUserRolesForResourceResponse, ApiError>;
-
-    /// Delete a user
-    async fn delete_user(
-        &self,
-        user_id: String,
-        ) -> Result<DeleteUserResponse, ApiError>;
-
-    /// Retrieve a user
-    async fn get_user(
-        &self,
-        user_id: String,
-        ) -> Result<GetUserResponse, ApiError>;
-
-    /// List users
-    async fn get_users(
-        &self,
-        limit: Option<i32>,
-        cursor: Option<String>,
-        filter: Option<String>,
-        tenant_id: Option<String>,
-        ) -> Result<GetUsersResponse, ApiError>;
-
-}
-
-/// Trait to extend an API to make it easy to bind it to a context.
-// pub trait ContextWrapperExt<C: Send + Sync> where Self: Sized
-// {
-//     /// Binds this API to a context.
-//     fn with_context(self, context: C) -> ContextWrapper<Self, C>;
-// }
-
-// impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ContextWrapperExt<C> for T {
-//     fn with_context(self: T, context: C) -> ContextWrapper<T, C> {
-//          ContextWrapper::<T, C>::new(self, context)
-//     }
-// }
-
+// /// API where `Context` isn't passed on every API call
 // #[async_trait]
-// impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for ContextWrapper<T, C> {
-//     fn poll_ready(&self, cx: &mut Context) -> Poll<Result<(), ServiceError>> {
-//         self.api().poll_ready(cx)
-//     }
+// #[allow(clippy::too_many_arguments, clippy::ptr_arg)]
+// pub trait ApiNoContext<C: Send + Sync> {
 
-//     fn context(&self) -> &C {
-//         ContextWrapper::context(self)
-//     }
+//     fn poll_ready(&self, _cx: &mut Context) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>>;
+
+//     fn context(&self) -> &C;
 
 //     /// Create resource Claim
 //     async fn create_claim(
 //         &self,
 //         claim_request: ClaimRequest,
-//         ) -> Result<CreateClaimResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_claim(claim_request, &context).await
-//     }
+//         ) -> Result<CreateClaimResponse, ApiError>;
 
 //     /// Create user invite
 //     async fn create_invite(
 //         &self,
 //         invite: Invite,
-//         ) -> Result<CreateInviteResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_invite(invite, &context).await
-//     }
+//         ) -> Result<CreateInviteResponse, ApiError>;
 
 //     /// Create access record
 //     async fn create_record(
 //         &self,
 //         access_record: AccessRecord,
-//         ) -> Result<CreateRecordResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_record(access_record, &context).await
-//     }
+//         ) -> Result<CreateRecordResponse, ApiError>;
 
 //     /// Create access request
 //     async fn create_request(
 //         &self,
 //         access_request: AccessRequest,
-//         ) -> Result<CreateRequestResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_request(access_request, &context).await
-//     }
+//         ) -> Result<CreateRequestResponse, ApiError>;
 
 //     /// Delete invite
 //     async fn delete_invite(
 //         &self,
 //         invite_id: String,
-//         ) -> Result<DeleteInviteResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_invite(invite_id, &context).await
-//     }
+//         ) -> Result<DeleteInviteResponse, ApiError>;
 
 //     /// Deletes access record
 //     async fn delete_record(
 //         &self,
 //         record_id: String,
-//         ) -> Result<DeleteRecordResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_record(record_id, &context).await
-//     }
+//         ) -> Result<DeleteRecordResponse, ApiError>;
 
 //     /// Deletes access request
 //     async fn delete_request(
 //         &self,
 //         request_id: String,
-//         ) -> Result<DeleteRequestResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_request(request_id, &context).await
-//     }
+//         ) -> Result<DeleteRequestResponse, ApiError>;
 
 //     /// Retrieve access record
 //     async fn get_record(
 //         &self,
 //         record_id: String,
-//         ) -> Result<GetRecordResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_record(record_id, &context).await
-//     }
+//         ) -> Result<GetRecordResponse, ApiError>;
 
 //     /// List access records
 //     async fn get_records(
@@ -2003,21 +1525,13 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         cursor: Option<String>,
 //         filter: Option<String>,
 //         status: Option<String>,
-//         ) -> Result<GetRecordsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_records(limit, cursor, filter, status, &context).await
-//     }
+//         ) -> Result<GetRecordsResponse, ApiError>;
 
 //     /// Retrieve access request
 //     async fn get_request(
 //         &self,
 //         request_id: String,
-//         ) -> Result<GetRequestResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_request(request_id, &context).await
-//     }
+//         ) -> Result<GetRequestResponse, ApiError>;
 
 //     /// List access requests
 //     async fn get_requests(
@@ -2025,32 +1539,20 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         limit: Option<i32>,
 //         cursor: Option<String>,
 //         status: Option<String>,
-//         ) -> Result<GetRequestsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_requests(limit, cursor, status, &context).await
-//     }
+//         ) -> Result<GetRequestsResponse, ApiError>;
 
 //     /// Approve or deny access request
 //     async fn respond_to_access_request(
 //         &self,
 //         request_id: String,
 //         access_request_response: AccessRequestResponse,
-//         ) -> Result<RespondToAccessRequestResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().respond_to_access_request(request_id, access_request_response, &context).await
-//     }
+//         ) -> Result<RespondToAccessRequestResponse, ApiError>;
 
 //     /// Accept invite
 //     async fn respond_to_invite(
 //         &self,
 //         invite_id: String,
-//         ) -> Result<RespondToInviteResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().respond_to_invite(invite_id, &context).await
-//     }
+//         ) -> Result<RespondToInviteResponse, ApiError>;
 
 //     /// Update access record
 //     async fn update_record(
@@ -2058,225 +1560,122 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         record_id: String,
 //         access_record: AccessRecord,
 //         if_unmodified_since: Option<String>,
-//         ) -> Result<UpdateRecordResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_record(record_id, access_record, if_unmodified_since, &context).await
-//     }
+//         ) -> Result<UpdateRecordResponse, ApiError>;
 
 //     /// Link external provider
 //     async fn delegate_authentication(
 //         &self,
 //         identity_request: IdentityRequest,
-//         ) -> Result<DelegateAuthenticationResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delegate_authentication(identity_request, &context).await
-//     }
+//         ) -> Result<DelegateAuthenticationResponse, ApiError>;
 
 //     /// Retrieve account information
 //     async fn get_account(
 //         &self,
 //         account_id: String,
-//         ) -> Result<GetAccountResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_account(account_id, &context).await
-//     }
+//         ) -> Result<GetAccountResponse, ApiError>;
 
 //     /// List linked external providers
 //     async fn get_account_identities(
 //         &self,
-//         ) -> Result<GetAccountIdentitiesResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_account_identities(&context).await
-//     }
+//         ) -> Result<GetAccountIdentitiesResponse, ApiError>;
 
 //     /// List user Authress accounts
 //     async fn get_accounts(
 //         &self,
 //         earliest_cache_time: Option<chrono::DateTime::<chrono::Utc>>,
-//         ) -> Result<GetAccountsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_accounts(earliest_cache_time, &context).await
-//     }
+//         ) -> Result<GetAccountsResponse, ApiError>;
 
 //     /// Log user into third-party application
 //     async fn delegate_user_login(
 //         &self,
 //         application_id: String,
 //         user_id: String,
-//         ) -> Result<DelegateUserLoginResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delegate_user_login(application_id, user_id, &context).await
-//     }
+//         ) -> Result<DelegateUserLoginResponse, ApiError>;
 
 //     /// Create SSO connection
 //     async fn create_connection(
 //         &self,
 //         connection: Connection,
-//         ) -> Result<CreateConnectionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_connection(connection, &context).await
-//     }
+//         ) -> Result<CreateConnectionResponse, ApiError>;
 
 //     /// Delete SSO connection
 //     async fn delete_connection(
 //         &self,
 //         connection_id: String,
-//         ) -> Result<DeleteConnectionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_connection(connection_id, &context).await
-//     }
+//         ) -> Result<DeleteConnectionResponse, ApiError>;
 
 //     /// Retrieve SSO connection
 //     async fn get_connection(
 //         &self,
 //         connection_id: String,
-//         ) -> Result<GetConnectionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_connection(connection_id, &context).await
-//     }
+//         ) -> Result<GetConnectionResponse, ApiError>;
 
 //     /// Retrieve user connection credentials
 //     async fn get_connection_credentials(
 //         &self,
 //         connection_id: String,
 //         user_id: String,
-//         ) -> Result<GetConnectionCredentialsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_connection_credentials(connection_id, user_id, &context).await
-//     }
+//         ) -> Result<GetConnectionCredentialsResponse, ApiError>;
 
 //     /// List SSO connections
 //     async fn get_connections(
 //         &self,
-//         ) -> Result<GetConnectionsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_connections(&context).await
-//     }
+//         ) -> Result<GetConnectionsResponse, ApiError>;
 
 //     /// Update SSO connection
 //     async fn update_connection(
 //         &self,
 //         connection_id: String,
 //         connection: Connection,
-//         ) -> Result<UpdateConnectionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_connection(connection_id, connection, &context).await
-//     }
+//         ) -> Result<UpdateConnectionResponse, ApiError>;
 
 //     /// Create extension
 //     async fn create_extension(
 //         &self,
 //         extension: Extension,
-//         ) -> Result<CreateExtensionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_extension(extension, &context).await
-//     }
+//         ) -> Result<CreateExtensionResponse, ApiError>;
 
 //     /// Delete extension
 //     async fn delete_extension(
 //         &self,
 //         extension_id: String,
-//         ) -> Result<DeleteExtensionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_extension(extension_id, &context).await
-//     }
+//         ) -> Result<DeleteExtensionResponse, ApiError>;
 
 //     /// Retrieve extension
 //     async fn get_extension(
 //         &self,
 //         extension_id: String,
-//         ) -> Result<GetExtensionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_extension(extension_id, &context).await
-//     }
+//         ) -> Result<GetExtensionResponse, ApiError>;
 
 //     /// List extensions
 //     async fn get_extensions(
 //         &self,
-//         ) -> Result<GetExtensionsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_extensions(&context).await
-//     }
-
-//     /// OAuth Authorize
-//     async fn login(
-//         &self,
-//         client_id: String,
-//         code_challenge: String,
-//         redirect_uri: String,
-//         code_challenge_method: Option<String>,
-//         ) -> Result<LoginResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().login(client_id, code_challenge, redirect_uri, code_challenge_method, &context).await
-//     }
-
-//     /// OAuth Token
-//     async fn request_token(
-//         &self,
-//         o_auth_token_request: OAuthTokenRequest,
-//         ) -> Result<RequestTokenResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().request_token(o_auth_token_request, &context).await
-//     }
+//         ) -> Result<GetExtensionsResponse, ApiError>;
 
 //     /// Update extension
 //     async fn update_extension(
 //         &self,
 //         extension_id: String,
 //         extension: Extension,
-//         ) -> Result<UpdateExtensionResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_extension(extension_id, extension, &context).await
-//     }
+//         ) -> Result<UpdateExtensionResponse, ApiError>;
 
 //     /// Create group
 //     async fn create_group(
 //         &self,
 //         group: Group,
-//         ) -> Result<CreateGroupResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_group(group, &context).await
-//     }
+//         ) -> Result<CreateGroupResponse, ApiError>;
 
 //     /// Deletes group
 //     async fn delete_group(
 //         &self,
 //         group_id: String,
-//         ) -> Result<DeleteGroupResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_group(group_id, &context).await
-//     }
+//         ) -> Result<DeleteGroupResponse, ApiError>;
 
 //     /// Retrieve group
 //     async fn get_group(
 //         &self,
 //         group_id: String,
-//         ) -> Result<GetGroupResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_group(group_id, &context).await
-//     }
+//         ) -> Result<GetGroupResponse, ApiError>;
 
 //     /// List groups
 //     async fn get_groups(
@@ -2284,41 +1683,25 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         limit: Option<i32>,
 //         cursor: Option<String>,
 //         filter: Option<String>,
-//         ) -> Result<GetGroupsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_groups(limit, cursor, filter, &context).await
-//     }
+//         ) -> Result<GetGroupsResponse, ApiError>;
 
 //     /// Update a group
 //     async fn update_group(
 //         &self,
 //         group_id: String,
 //         group: Group,
-//         ) -> Result<UpdateGroupResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_group(group_id, group, &context).await
-//     }
+//         ) -> Result<UpdateGroupResponse, ApiError>;
 
 //     /// Retrieve resource configuration
 //     async fn get_permissioned_resource(
 //         &self,
 //         resource_uri: String,
-//         ) -> Result<GetPermissionedResourceResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_permissioned_resource(resource_uri, &context).await
-//     }
+//         ) -> Result<GetPermissionedResourceResponse, ApiError>;
 
 //     /// List all resource configurations
 //     async fn get_permissioned_resources(
 //         &self,
-//         ) -> Result<GetPermissionedResourcesResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_permissioned_resources(&context).await
-//     }
+//         ) -> Result<GetPermissionedResourcesResponse, ApiError>;
 
 //     /// List users with resource access
 //     async fn get_resource_users(
@@ -2326,195 +1709,119 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         resource_uri: String,
 //         limit: Option<i32>,
 //         cursor: Option<String>,
-//         ) -> Result<GetResourceUsersResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_resource_users(resource_uri, limit, cursor, &context).await
-//     }
+//         ) -> Result<GetResourceUsersResponse, ApiError>;
 
 //     /// Update resource configuration
 //     async fn update_permissioned_resource(
 //         &self,
 //         resource_uri: String,
 //         permissioned_resource: PermissionedResource,
-//         ) -> Result<UpdatePermissionedResourceResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_permissioned_resource(resource_uri, permissioned_resource, &context).await
-//     }
+//         ) -> Result<UpdatePermissionedResourceResponse, ApiError>;
 
 //     /// Create role
 //     async fn create_role(
 //         &self,
 //         role: Role,
-//         ) -> Result<CreateRoleResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_role(role, &context).await
-//     }
+//         ) -> Result<CreateRoleResponse, ApiError>;
 
 //     /// Deletes role
 //     async fn delete_role(
 //         &self,
 //         role_id: String,
-//         ) -> Result<DeleteRoleResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_role(role_id, &context).await
-//     }
+//         ) -> Result<DeleteRoleResponse, ApiError>;
 
 //     /// Retrieve role
 //     async fn get_role(
 //         &self,
 //         role_id: String,
-//         ) -> Result<GetRoleResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_role(role_id, &context).await
-//     }
+//         ) -> Result<GetRoleResponse, ApiError>;
 
 //     /// List roles
 //     async fn get_roles(
 //         &self,
-//         ) -> Result<GetRolesResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_roles(&context).await
-//     }
+//         ) -> Result<GetRolesResponse, ApiError>;
 
 //     /// Update role
 //     async fn update_role(
 //         &self,
 //         role_id: String,
 //         role: Role,
-//         ) -> Result<UpdateRoleResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_role(role_id, role, &context).await
-//     }
+//         ) -> Result<UpdateRoleResponse, ApiError>;
 
 //     /// Create service client
 //     async fn create_client(
 //         &self,
 //         client: Client,
-//         ) -> Result<CreateClientResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_client(client, &context).await
-//     }
+//         ) -> Result<CreateClientResponse, ApiError>;
 
 //     /// Delete service client access key
 //     async fn delete_access_key(
 //         &self,
 //         client_id: String,
 //         key_id: String,
-//         ) -> Result<DeleteAccessKeyResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_access_key(client_id, key_id, &context).await
-//     }
+//         ) -> Result<DeleteAccessKeyResponse, ApiError>;
 
 //     /// Delete service client
 //     async fn delete_client(
 //         &self,
 //         client_id: String,
-//         ) -> Result<DeleteClientResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_client(client_id, &context).await
-//     }
+//         ) -> Result<DeleteClientResponse, ApiError>;
 
 //     /// Retrieve service client
 //     async fn get_client(
 //         &self,
 //         client_id: String,
-//         ) -> Result<GetClientResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_client(client_id, &context).await
-//     }
+//         ) -> Result<GetClientResponse, ApiError>;
 
 //     /// List service clients
 //     async fn get_clients(
 //         &self,
 //         limit: Option<i32>,
 //         cursor: Option<String>,
-//         ) -> Result<GetClientsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_clients(limit, cursor, &context).await
-//     }
+//         ) -> Result<GetClientsResponse, ApiError>;
 
 //     /// Generate service client access key
 //     async fn request_access_key(
 //         &self,
 //         client_id: String,
-//         ) -> Result<RequestAccessKeyResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().request_access_key(client_id, &context).await
-//     }
+//         ) -> Result<RequestAccessKeyResponse, ApiError>;
 
 //     /// Update service client
 //     async fn update_client(
 //         &self,
 //         client_id: String,
 //         client: Client,
-//         ) -> Result<UpdateClientResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_client(client_id, client, &context).await
-//     }
+//         ) -> Result<UpdateClientResponse, ApiError>;
 
 //     /// Create tenant
 //     async fn create_tenant(
 //         &self,
 //         tenant: Tenant,
-//         ) -> Result<CreateTenantResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().create_tenant(tenant, &context).await
-//     }
+//         ) -> Result<CreateTenantResponse, ApiError>;
 
 //     /// Delete tenant
 //     async fn delete_tenant(
 //         &self,
 //         tenant_id: String,
-//         ) -> Result<DeleteTenantResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_tenant(tenant_id, &context).await
-//     }
+//         ) -> Result<DeleteTenantResponse, ApiError>;
 
 //     /// Retrieve tenant
 //     async fn get_tenant(
 //         &self,
 //         tenant_id: String,
-//         ) -> Result<GetTenantResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_tenant(tenant_id, &context).await
-//     }
+//         ) -> Result<GetTenantResponse, ApiError>;
 
 //     /// List tenants
 //     async fn get_tenants(
 //         &self,
-//         ) -> Result<GetTenantsResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_tenants(&context).await
-//     }
+//         ) -> Result<GetTenantsResponse, ApiError>;
 
 //     /// Update tenant
 //     async fn update_tenant(
 //         &self,
 //         tenant_id: String,
 //         tenant: Tenant,
-//         ) -> Result<UpdateTenantResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().update_tenant(tenant_id, tenant, &context).await
-//     }
+//         ) -> Result<UpdateTenantResponse, ApiError>;
 
 //     /// Verify user authorization
 //     async fn authorize_user(
@@ -2522,22 +1829,14 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         user_id: String,
 //         resource_uri: String,
 //         permission: String,
-//         ) -> Result<AuthorizeUserResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().authorize_user(user_id, resource_uri, permission, &context).await
-//     }
+//         ) -> Result<AuthorizeUserResponse, ApiError>;
 
 //     /// Get user permissions for resource
 //     async fn get_user_permissions_for_resource(
 //         &self,
 //         user_id: String,
 //         resource_uri: String,
-//         ) -> Result<GetUserPermissionsForResourceResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_user_permissions_for_resource(user_id, resource_uri, &context).await
-//     }
+//         ) -> Result<GetUserPermissionsForResourceResponse, ApiError>;
 
 //     /// List user resources
 //     async fn get_user_resources(
@@ -2548,42 +1847,26 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         permissions: Option<String>,
 //         limit: Option<i32>,
 //         cursor: Option<String>,
-//         ) -> Result<GetUserResourcesResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_user_resources(user_id, resource_uri, collection_configuration, permissions, limit, cursor, &context).await
-//     }
+//         ) -> Result<GetUserResourcesResponse, ApiError>;
 
 //     /// Get user roles for resource
 //     async fn get_user_roles_for_resource(
 //         &self,
 //         user_id: String,
 //         resource_uri: String,
-//         ) -> Result<GetUserRolesForResourceResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_user_roles_for_resource(user_id, resource_uri, &context).await
-//     }
+//         ) -> Result<GetUserRolesForResourceResponse, ApiError>;
 
 //     /// Delete a user
 //     async fn delete_user(
 //         &self,
 //         user_id: String,
-//         ) -> Result<DeleteUserResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().delete_user(user_id, &context).await
-//     }
+//         ) -> Result<DeleteUserResponse, ApiError>;
 
 //     /// Retrieve a user
 //     async fn get_user(
 //         &self,
 //         user_id: String,
-//         ) -> Result<GetUserResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_user(user_id, &context).await
-//     }
+//         ) -> Result<GetUserResponse, ApiError>;
 
 //     /// List users
 //     async fn get_users(
@@ -2592,11 +1875,7 @@ pub trait ApiNoContext<C: Send + Sync> {
 //         cursor: Option<String>,
 //         filter: Option<String>,
 //         tenant_id: Option<String>,
-//         ) -> Result<GetUsersResponse, ApiError>
-//     {
-//         let context = self.context().clone();
-//         self.api().get_users(limit, cursor, filter, tenant_id, &context).await
-//     }
+//         ) -> Result<GetUsersResponse, ApiError>;
 
 // }
 

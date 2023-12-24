@@ -5,7 +5,7 @@
 #![allow(unused_imports)]
 
 use async_trait::async_trait;
-use authress_local::authentication::{RequestTokenResponse, LoginResponse, AuthenticationResponse, OpenIdConfigurationResponse, JwksResponse};
+use authress_local::authentication::{RequestTokenResponse, LoginResponse, AuthenticationResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationRequest};
 use futures::{future, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use hyper::server::conn::Http;
 use hyper::service::Service;
@@ -27,6 +27,7 @@ use authress_local::*;
 use authress_local::server::MakeService;
 use std::error::Error;
 
+use crate::authentication_controller;
 use crate::databases::{Databases, self};
 
 pub async fn create(addr: &str, databases: &'static Databases) {
@@ -91,14 +92,16 @@ pub async fn create(addr: &str, databases: &'static Databases) {
 #[derive(Copy, Clone)]
 pub struct Server<C> {
     marker: PhantomData<C>,
-    databases: &'static Databases
+    databases: &'static Databases,
+    authentication_controller: authentication_controller::AuthenticationController
 }
 
 impl<C> Server<C> {
     pub fn new(databases: &'static Databases) -> Self {
         Server {
             marker: PhantomData,
-            databases: &databases
+            databases: &databases,
+            authentication_controller: authentication_controller::AuthenticationController::default()
         }
     }
 }
@@ -408,19 +411,16 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /* ********************************* */
 
     /// Authenticate
-    async fn authenticate(&self, host: &str, context: &C) -> Result<AuthenticationResponse, ApiError> {
+    async fn authenticate(&self, host: &str, authentication_request: AuthenticationRequest, context: &C) -> Result<AuthenticationResponse, ApiError> {
         let signature_key_db = self.databases.signature_key.lock().unwrap();
-        
-        let result = signature_key_db.create_token(host);
+        let result = self.authentication_controller.start_authentication(host, authentication_request, signature_key_db.to_owned());
         info!("authenticate({host})- X-Span-ID: {:?}", context.get().0.clone());
         return Ok(AuthenticationResponse::Success(serde_json::to_string(&result).unwrap()));
     }
 
     /// Get OpenID Configuration
-    async fn open_id_configuration(&self, host: &str, context: &C) -> Result<OpenIdConfigurationResponse, ApiError> {
-        let signature_key_db = self.databases.signature_key.lock().unwrap();
-        
-        let result = signature_key_db.get_openid_configuration(host);
+    async fn open_id_configuration(&self, host: &str, context: &C) -> Result<OpenIdConfigurationResponse, ApiError> {       
+        let result = self.authentication_controller.get_openid_configuration(host);
         info!("open_id_configuration({host})- X-Span-ID: {:?}", context.get().0.clone());
         return Ok(OpenIdConfigurationResponse::Success(serde_json::to_string(&result).unwrap()));
     }
@@ -428,8 +428,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /// Get OpenID Configuration JWKS
     async fn jwks(&self, context: &C) -> Result<JwksResponse, ApiError> {
         let signature_key_db = self.databases.signature_key.lock().unwrap();
-        
-        let result = signature_key_db.get_jwks();
+        let result = self.authentication_controller.get_jwks(signature_key_db.to_owned());
         info!("jwks()- X-Span-ID: {:?}", context.get().0.clone());
         return Ok(JwksResponse::Success(serde_json::to_string(&result).unwrap()));
     }
@@ -441,11 +440,12 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
-    /// OAuth Token
-    async fn request_token(&self, o_auth_token_request: OAuthTokenRequest,context: &C) -> Result<RequestTokenResponse, ApiError> {
-        
-        info!("request_token({:?}) - X-Span-ID: {:?}", o_auth_token_request, context.get().0.clone());
-        Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
+    /// Request Token
+    async fn request_token(&self, host: &str, context: &C) -> Result<RequestTokenResponse, ApiError> {
+        let signature_key_db = self.databases.signature_key.lock().unwrap();
+        let result = self.authentication_controller.get_token(host, signature_key_db.to_owned());
+        info!("authenticate({host})- X-Span-ID: {:?}", context.get().0.clone());
+        return Ok(RequestTokenResponse::Success(serde_json::to_string(&result).unwrap()));
     }
 
     /* ********************************* */

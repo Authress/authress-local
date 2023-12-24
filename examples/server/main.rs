@@ -5,6 +5,7 @@
 mod server;
 mod databases;
 mod authentication;
+mod authentication_controller;
 
 use lazy_static::lazy_static;
 use log::info;
