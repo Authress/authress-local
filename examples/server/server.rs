@@ -444,7 +444,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     async fn request_token(&self, host: &str, context: &C) -> Result<RequestTokenResponse, ApiError> {
         let signature_key_db = self.databases.signature_key.lock().unwrap();
         let result = self.authentication_controller.get_token(host, signature_key_db.to_owned());
-        info!("authenticate({host})- X-Span-ID: {:?}", context.get().0.clone());
+        info!("request_token({host})- X-Span-ID: {:?}", context.get().0.clone());
         return Ok(RequestTokenResponse::Success(serde_json::to_string(&result).unwrap()));
     }
 

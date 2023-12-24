@@ -3393,6 +3393,34 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 Ok(response)
             },
 
+            // Logout GET /
+            hyper::Method::GET if regex::Regex::new(r"^/logout$")?.is_match(uri.path()) => {
+                let query_params = form_urlencoded::parse(uri.query().unwrap_or_default().as_bytes()).collect::<Vec<_>>();
+                let redirect_uri = query_params.iter().filter(|e| e.0 == "redirect_uri").map(|e| e.1.clone())
+                    .next();
+                let redirect_uri = match redirect_uri {
+                    Some(redirect_uri) => {
+                        let redirect_uri =
+                            <String as std::str::FromStr>::from_str
+                                (&redirect_uri);
+                        match redirect_uri {
+                            Ok(redirect_uri) => Some(redirect_uri),
+                            Err(e) => return Ok(Response::builder()
+                                .status(StatusCode::BAD_REQUEST)
+                                .body(Body::from(format!("Couldn't parse query parameter redirect_uri - doesn't match schema: {}", e)))
+                                .expect("Unable to create Bad Request response for invalid query parameter redirect_uri")),
+                        }
+                    },
+                    None => None,
+                };
+
+                return Ok(Response::builder()
+                    .status(StatusCode::TEMPORARY_REDIRECT)
+                    .header("location", redirect_uri.unwrap())
+                    .body(Body::from(""))
+                    .expect("Unable to create redirect for logout."));
+            },
+
             // Authenticate - POST /api/authentication
             hyper::Method::POST if regex::Regex::new(r"^/api/authentication$")?.is_match(uri.path()) => {
                 // Body parameters (note that non-required body parameters will ignore garbage
