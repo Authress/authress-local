@@ -75,16 +75,13 @@ impl SignatureKey {
         };
     }
 
-    pub fn get_jwks(&self) -> JwkList {
-        let jwk = JWK {
+    pub fn get_jwk(&self) -> JWK {
+        return JWK {
             kty: "OKP".to_owned(),
             crv: "Ed25519".to_owned(),
             alg: "EdDSA".to_owned(),
             kid: "authress-local".to_owned(),
             x: engine::general_purpose::URL_SAFE_NO_PAD.encode(self.key_pair.verifying_key().to_bytes())
-        };
-        return JwkList {
-            keys: vec![jwk]
         };
     }
 }
