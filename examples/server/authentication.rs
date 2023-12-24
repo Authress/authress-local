@@ -94,7 +94,7 @@ impl SignatureKey {
             aud: "localhost".to_owned(),
             exp: usize::try_from(chrono::offset::Local::now().add(Duration::days(1)).timestamp()).unwrap(),
             iat: usize::try_from(chrono::offset::Local::now().timestamp()).unwrap(),
-            iss: format!("https//{host}"),
+            iss: format!("http://{host}"),
             sub: "me".to_owned(),
             ..Default::default()
         };
@@ -110,7 +110,7 @@ impl SignatureKey {
             aud: "localhost".to_owned(),
             exp: usize::try_from(chrono::offset::Local::now().add(Duration::days(1)).timestamp()).unwrap(),
             iat: usize::try_from(chrono::offset::Local::now().timestamp()).unwrap(),
-            iss: format!("https//{host}"),
+            iss: format!("http://{host}"),
             sub: "me".to_owned(),
             email: Some("me@local.com".to_owned()),
             name: Some("Current Test User".to_owned()),
