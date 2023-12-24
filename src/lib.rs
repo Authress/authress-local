@@ -5,7 +5,7 @@
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
-use authentication::{LoginResponse, RequestTokenResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationResponse};
+use authentication::{LoginResponse, RequestTokenResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationResponse, AuthenticationRequest};
 use authress::models::*;
 use futures::Stream;
 use log::*;
@@ -1214,6 +1214,7 @@ pub trait Api<C: Send + Sync> {
     async fn authenticate(
         &self,
         host_value: &str,
+        authentication_request: AuthenticationRequest,
         context: &C) -> Result<AuthenticationResponse, ApiError>;
     
     /// Open ID Configuration

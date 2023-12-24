@@ -438,6 +438,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             }
         };
 
+        let origin_header = headers.get(HeaderName::from_static("origin"));
         let host_value = (&host_header.unwrap()).to_str().unwrap();
 
         match method {
@@ -3367,6 +3368,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 if let Ok(OpenIdConfigurationResponse::Success(body)) = result {
                     *response.body_mut() = Body::from(body);
                 }
+
+                response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap().to_owned());
                 Ok(response)
             },
 
@@ -3408,8 +3411,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                 Ok(authentication_request) => authentication_request,
                                 Err(e) => return Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't parse body parameter OAuthTokenRequest - doesn't match schema: {}", e)))
-                                                .expect("Unable to create Bad Request response for invalid body parameter OAuthTokenRequest due to schema")),
+                                                .body(Body::from(format!("Couldn't parse body parameter AuthenticationRequest - doesn't match schema: {}", e)))
+                                                .expect("Unable to create Bad Request response for invalid body parameter AuthenticationRequest due to schema")),
                             }
                         } else {
                             None
@@ -3422,7 +3425,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 .expect("Unable to create Bad Request response for missing body parameter OAuthTokenRequest")),
                         };
 
-                        let result = api_impl.authenticate(host_value, &context).await;
+                        let result = api_impl.authenticate(host_value, authentication_request, &context).await;
                         let mut response = Response::new(Body::empty());
                         response.headers_mut().insert(
                                     HeaderName::from_static("x-span-id"),
@@ -3461,6 +3464,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             }
                         }
 
+                        response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap().to_owned());
                         Ok(response)
                     },
                     Err(e) => Ok(Response::builder()
@@ -3546,6 +3550,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             }
                         }
 
+                        response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap().to_owned());
                         return Ok(response);
                     },
                     Err(e) => Ok(Response::builder()
@@ -6893,7 +6898,20 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         Ok(response)
             },
 
-            _ if path.matched(paths::ID_) => method_not_allowed(),
+            // Fallback All Options 
+            hyper::Method::OPTIONS => {
+                return Ok(Response::builder()
+                    .header("access-control-allow-origin", (&origin_header.unwrap()).to_str().unwrap())
+                    .header("cache-control", "public, max-age=864000")
+                    .header("access-control-allow-headers", "content-type,x-amz-date,authorization,x-api-key,x-powered-by,if-unmodified-since,origin,referer,accept,accept-language,accept-encoding,user-agent,content-length,cache-control,pragma,sec-fetch-dest,sec-fetch-mode,sec-fetch-site,sec-gpc")
+                    .header("access-control-allow-methods", "delete,get,head,options,patch,post,put")
+                
+                    .header("access-control-allow-credentials", "true")
+                    .status(StatusCode::OK).body(Body::empty())
+                    .expect("Unable to create OPTIONS response"));
+            },
+
+            z if path.matched(paths::ID_) => method_not_allowed(),
             _ if path.matched(paths::ID_API_AUTHENTICATION_OAUTH_TOKENS) => method_not_allowed(),
             _ if path.matched(paths::ID_V1_ACCOUNTS) => method_not_allowed(),
             _ if path.matched(paths::ID_V1_ACCOUNTS_ACCOUNTID) => method_not_allowed(),

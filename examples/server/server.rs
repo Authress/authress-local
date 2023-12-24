@@ -5,7 +5,7 @@
 #![allow(unused_imports)]
 
 use async_trait::async_trait;
-use authress_local::authentication::{RequestTokenResponse, LoginResponse, AuthenticationResponse, OpenIdConfigurationResponse, JwksResponse};
+use authress_local::authentication::{RequestTokenResponse, LoginResponse, AuthenticationResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationRequest};
 use futures::{future, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use hyper::server::conn::Http;
 use hyper::service::Service;
@@ -411,9 +411,9 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /* ********************************* */
 
     /// Authenticate
-    async fn authenticate(&self, host: &str, context: &C) -> Result<AuthenticationResponse, ApiError> {
+    async fn authenticate(&self, host: &str, authentication_request: AuthenticationRequest, context: &C) -> Result<AuthenticationResponse, ApiError> {
         let signature_key_db = self.databases.signature_key.lock().unwrap();
-        let result = self.authentication_controller.start_authentication(host, signature_key_db.to_owned());
+        let result = self.authentication_controller.start_authentication(host, authentication_request, signature_key_db.to_owned());
         info!("authenticate({host})- X-Span-ID: {:?}", context.get().0.clone());
         return Ok(AuthenticationResponse::Success(serde_json::to_string(&result).unwrap()));
     }

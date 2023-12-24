@@ -60,9 +60,8 @@ pub enum AuthenticationResponse {
 
 #[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthenticationRequest {
-    // /// The client identifier to constrain the token to.
-    // #[serde(rename = "client_id")]
-    // pub client_id: String,
+    #[serde(rename = "redirectUrl")]
+    pub redirect_url: String,
     // /// The secret associated with the client that authorizes the generation of token it's behalf. (Either the `client_secret` or the `code_verifier` is required)
     // #[serde(rename = "client_secret", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     // pub client_secret: Option<Option<String>>,
@@ -84,8 +83,9 @@ pub struct AuthenticationRequest {
 }
 
 impl AuthenticationRequest {
-    pub fn new(client_id: String) -> AuthenticationRequest {
+    pub fn new(redirect_url: String) -> AuthenticationRequest {
         AuthenticationRequest {
+            redirect_url,
             // client_id,
             // client_secret: None,
             // code_verifier: None,
