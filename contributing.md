@@ -4,13 +4,21 @@
 
 * Follows [Rust Package Layout](https://doc.rust-lang.org/cargo/guide/project-layout.html)
 
-## Running the Rust Service locally
+## Development
+
+### Upgrade rust
+Make sure rust is the latest version
+```sh
+rustup update
+```
+
+### Running the Rust Service locally
 ```sh
 cargo build --example server 
 cargo run --example server
 ```
 
-## Build the container locally
+### Build the container locally
 
 You'll need to first update your registries to include docker.io if you haven't done that
 
@@ -25,7 +33,7 @@ podman build -f Dockerfile -t authress-local
 podman run -it -p 8888:8888 localhost/authress-local:latest
 ```
 
-## Stop the container
+### Stop the container
 ```sh
 podman container ls
 podman container kill NAME
@@ -33,7 +41,7 @@ podman container prune
 podman image prune
 ```
 
-## Debug the container
+### Debug the container
 ```sh
 # copy file out
 podman cp <container_id>:/path/to/useful/file /local-path

@@ -4,6 +4,7 @@
 
 mod server;
 mod databases;
+mod authentication;
 
 use lazy_static::lazy_static;
 use log::info;

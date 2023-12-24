@@ -24,6 +24,7 @@ pub use crate::context;
 type ServiceFuture = BoxFuture<'static, Result<Response<Body>, crate::ServiceError>>;
 
 use authress::models::*;
+use crate::authentication::{LoginResponse, RequestTokenResponse, JwksResponse, OpenIdConfigurationResponse, AuthenticationResponse, AuthenticationRequest};
 use crate::{Api,
      CreateClaimResponse,
      CreateInviteResponse,
@@ -54,8 +55,6 @@ use crate::{Api,
      DeleteExtensionResponse,
      GetExtensionResponse,
      GetExtensionsResponse,
-     LoginResponse,
-     RequestTokenResponse,
      UpdateExtensionResponse,
      CreateGroupResponse,
      DeleteGroupResponse,
@@ -159,6 +158,7 @@ mod paths {
     pub(crate) static ID_API_AUTHENTICATION_OAUTH_TOKENS: usize = 1;
     pub(crate) static ID_V1_ACCOUNTS: usize = 2;
     pub(crate) static ID_V1_ACCOUNTS_ACCOUNTID: usize = 3;
+    
     lazy_static! {
         pub static ref REGEX_V1_ACCOUNTS_ACCOUNTID: regex::Regex =
             #[allow(clippy::invalid_regex)]
@@ -437,6 +437,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                     .body(Body::from(CREATE_AN_AUTHRESS_ACCOUNT))?);
             }
         };
+
+        let host_value = (&host_header.unwrap()).to_str().unwrap();
 
         match method {
             // CreateClaim - POST /v1/claims
@@ -3348,95 +3350,212 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         Ok(response)
             },
 
-            // RequestToken - POST /api/authentication/oauth/tokens
-            hyper::Method::POST if path.matched(paths::ID_API_AUTHENTICATION_OAUTH_TOKENS) => {
+            // Open ID Configuration - GET /.well-known/openid-configuration
+            hyper::Method::GET if regex::Regex::new(r"^/.well-known/openid-configuration$")?.is_match(uri.path()) => {
+                let result = api_impl.open_id_configuration(host_value, &context).await;
+                let mut response = Response::new(Body::empty());
+                response.headers_mut().insert(
+                        HeaderName::from_static("x-span-id"),
+                        HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                            .expect("Unable to create X-Span-ID header value"));
+
+                *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+                response.headers_mut().insert(
+                    CONTENT_TYPE,
+                    HeaderValue::from_str("application/links+json")
+                        .expect("Unable to create Content-Type header for OpenID Configuration"));
+                if let Ok(OpenIdConfigurationResponse::Success(body)) = result {
+                    *response.body_mut() = Body::from(body);
+                }
+                Ok(response)
+            },
+
+            // Open ID Configuration JWKS - GET /.well-known/openid-configuration/jwks
+            hyper::Method::GET if regex::Regex::new(r"^/.well-known/openid-configuration/jwks$")?.is_match(uri.path()) => {
+                let result = api_impl.jwks(&context).await;
+                let mut response = Response::new(Body::empty());
+                response.headers_mut().insert(
+                        HeaderName::from_static("x-span-id"),
+                        HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                            .expect("Unable to create X-Span-ID header value"));
+
+                *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+                response.headers_mut().insert(
+                    CONTENT_TYPE,
+                    HeaderValue::from_str("application/links+json")
+                        .expect("Unable to create Content-Type header for OpenID Configuration"));
+                if let Ok(JwksResponse::Success(body)) = result {
+                    *response.body_mut() = Body::from(body);
+                }
+                Ok(response)
+            },
+
+            // Authenticate - POST /api/authentication
+            hyper::Method::POST if regex::Regex::new(r"^/api/authentication$")?.is_match(uri.path()) => {
                 // Body parameters (note that non-required body parameters will ignore garbage
                 // values, rather than causing a 400 response). Produce warning header and logs for
                 // any unused fields.
                 let result = body.into_raw().await;
                 match result {
-                            Ok(body) => {
-                                let mut unused_elements = Vec::new();
-                                let param_o_auth_token_request: Option<OAuthTokenRequest> = if !body.is_empty() {
-                                    let deserializer = &mut serde_json::Deserializer::from_slice(&body);
-                                    match serde_ignored::deserialize(deserializer, |path| {
-                                            warn!("Ignoring unknown field in body: {}", path);
-                                            unused_elements.push(path.to_string());
-                                    }) {
-                                        Ok(param_o_auth_token_request) => param_o_auth_token_request,
-                                        Err(e) => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from(format!("Couldn't parse body parameter OAuthTokenRequest - doesn't match schema: {}", e)))
-                                                        .expect("Unable to create Bad Request response for invalid body parameter OAuthTokenRequest due to schema")),
-                                    }
-                                } else {
-                                    None
-                                };
-                                let param_o_auth_token_request = match param_o_auth_token_request {
-                                    Some(param_o_auth_token_request) => param_o_auth_token_request,
-                                    None => return Ok(Response::builder()
-                                                        .status(StatusCode::BAD_REQUEST)
-                                                        .body(Body::from("Missing required body parameter OAuthTokenRequest"))
-                                                        .expect("Unable to create Bad Request response for missing body parameter OAuthTokenRequest")),
-                                };
-
-                                let result = api_impl.request_token(
-                                            param_o_auth_token_request,
-                                        &context
-                                    ).await;
-                                let mut response = Response::new(Body::empty());
-                                response.headers_mut().insert(
-                                            HeaderName::from_static("x-span-id"),
-                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
-                                                .expect("Unable to create X-Span-ID header value"));
-
-                                        if !unused_elements.is_empty() {
-                                            response.headers_mut().insert(
-                                                HeaderName::from_static("warning"),
-                                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
-                                                    .expect("Unable to create Warning header value"));
-                                        }
-
-                                        match result {
-                                            Ok(rsp) => match rsp {
-                                                RequestTokenResponse::Success
-                                                    (body)
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
-                                                    response.headers_mut().insert(
-                                                        CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/links+json")
-                                                            .expect("Unable to create Content-Type header for REQUEST_TOKEN_SUCCESS"));
-                                                    let body = body;
-                                                    *response.body_mut() = Body::from(body);
-                                                },
-                                                RequestTokenResponse::BadRequest
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(400).expect("Unable to turn 400 into a StatusCode");
-                                                },
-                                                RequestTokenResponse::Unauthorized
-                                                => {
-                                                    *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
-                                                },
-                                            },
-                                            Err(ApiError::NotImplementedError(_)) => {
-                                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
-                                            },
-                                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
-                                            Err(ApiError::UnknownApiError(error_message)) => {
-                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
-                                            }
-                                        }
-
-                                        Ok(response)
-                            },
-                            Err(e) => Ok(Response::builder()
+                    Ok(body) => {
+                        let mut unused_elements = Vec::new();
+                        let authentication_request: Option<AuthenticationRequest> = if !body.is_empty() {
+                            let deserializer = &mut serde_json::Deserializer::from_slice(&body);
+                            match serde_ignored::deserialize(deserializer, |path| {
+                                    warn!("Ignoring unknown field in body: {}", path);
+                                    unused_elements.push(path.to_string());
+                            }) {
+                                Ok(authentication_request) => authentication_request,
+                                Err(e) => return Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from(format!("Couldn't read body parameter OAuthTokenRequest: {}", e)))
-                                                .expect("Unable to create Bad Request response due to unable to read body parameter OAuthTokenRequest")),
+                                                .body(Body::from(format!("Couldn't parse body parameter OAuthTokenRequest - doesn't match schema: {}", e)))
+                                                .expect("Unable to create Bad Request response for invalid body parameter OAuthTokenRequest due to schema")),
+                            }
+                        } else {
+                            None
+                        };
+                        let authentication_request = match authentication_request {
+                            Some(authentication_request) => authentication_request,
+                            None => return Ok(Response::builder()
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .body(Body::from("Missing required body parameter OAuthTokenRequest"))
+                                                .expect("Unable to create Bad Request response for missing body parameter OAuthTokenRequest")),
+                        };
+
+                        let result = api_impl.authenticate(host_value, &context).await;
+                        let mut response = Response::new(Body::empty());
+                        response.headers_mut().insert(
+                                    HeaderName::from_static("x-span-id"),
+                                    HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                                        .expect("Unable to create X-Span-ID header value"));
+
+                        if !unused_elements.is_empty() {
+                            response.headers_mut().insert(
+                                HeaderName::from_static("warning"),
+                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
+                                    .expect("Unable to create Warning header value"));
                         }
+
+                        match result {
+                            Ok(rsp) => match rsp {
+                                AuthenticationResponse::Success
+                                    (body)
+                                => {
+                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+                                    response.headers_mut().insert(
+                                        CONTENT_TYPE,
+                                        HeaderValue::from_str("application/links+json")
+                                            .expect("Unable to create Content-Type header for REQUEST_TOKEN_SUCCESS"));
+                                    let body = body;
+                                    *response.body_mut() = Body::from(body);
+                                }
+                            },
+                            Err(ApiError::NotImplementedError(_)) => {
+                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                            },
+                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                            Err(ApiError::UnknownApiError(error_message)) => {
+                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
+                            }
+                        }
+
+                        Ok(response)
+                    },
+                    Err(e) => Ok(Response::builder()
+                        .status(StatusCode::BAD_REQUEST)
+                        .body(Body::from(format!("Couldn't read body parameter OAuthTokenRequest: {}", e)))
+                        .expect("Unable to create Bad Request response due to unable to read body parameter OAuthTokenRequest")),
+                }
+            },
+
+            // RequestToken - POST /api/authentication/oauth/tokens
+            hyper::Method::POST if path.matched(paths::ID_API_AUTHENTICATION_OAUTH_TOKENS) => {
+                let result = body.into_raw().await;
+                match result {
+                    Ok(body) => {
+                        let mut unused_elements = Vec::new();
+                        let param_o_auth_token_request: Option<OAuthTokenRequest> = if !body.is_empty() {
+                            let deserializer = &mut serde_json::Deserializer::from_slice(&body);
+                            match serde_ignored::deserialize(deserializer, |path| {
+                                    warn!("Ignoring unknown field in body: {}", path);
+                                    unused_elements.push(path.to_string());
+                            }) {
+                                Ok(param_o_auth_token_request) => param_o_auth_token_request,
+                                Err(e) => return Ok(Response::builder()
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .body(Body::from(format!("Couldn't parse body parameter OAuthTokenRequest - doesn't match schema: {}", e)))
+                                                .expect("Unable to create Bad Request response for invalid body parameter OAuthTokenRequest due to schema")),
+                            }
+                        } else {
+                            None
+                        };
+                        let param_o_auth_token_request = match param_o_auth_token_request {
+                            Some(param_o_auth_token_request) => param_o_auth_token_request,
+                            None => return Ok(Response::builder()
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .body(Body::from("Missing required body parameter OAuthTokenRequest"))
+                                                .expect("Unable to create Bad Request response for missing body parameter OAuthTokenRequest")),
+                        };
+
+                        let result = api_impl.request_token(
+                                    param_o_auth_token_request,
+                                &context
+                            ).await;
+                        let mut response = Response::new(Body::empty());
+                        response.headers_mut().insert(
+                                    HeaderName::from_static("x-span-id"),
+                                    HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                                        .expect("Unable to create X-Span-ID header value"));
+
+                        if !unused_elements.is_empty() {
+                            response.headers_mut().insert(
+                                HeaderName::from_static("warning"),
+                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
+                                    .expect("Unable to create Warning header value"));
+                        }
+
+                        match result {
+                            Ok(rsp) => match rsp {
+                                RequestTokenResponse::Success
+                                    (body)
+                                => {
+                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+                                    response.headers_mut().insert(
+                                        CONTENT_TYPE,
+                                        HeaderValue::from_str("application/links+json")
+                                            .expect("Unable to create Content-Type header for REQUEST_TOKEN_SUCCESS"));
+                                    let body = body;
+                                    *response.body_mut() = Body::from(body);
+                                },
+                                RequestTokenResponse::BadRequest
+                                => {
+                                    *response.status_mut() = StatusCode::from_u16(400).expect("Unable to turn 400 into a StatusCode");
+                                },
+                                RequestTokenResponse::Unauthorized
+                                => {
+                                    *response.status_mut() = StatusCode::from_u16(401).expect("Unable to turn 401 into a StatusCode");
+                                },
+                            },
+                            Err(ApiError::NotImplementedError(_)) => {
+                                *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                            },
+                            // Application code returned an error. This should not happen, as the implementation should return a valid response.
+                            Err(ApiError::UnknownApiError(error_message)) => {
+                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                                *response.body_mut() = Body::from(format!("An internal error occurred {}", error_message));
+                            }
+                        }
+
+                        return Ok(response);
+                    },
+                    Err(e) => Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't read body parameter OAuthTokenRequest: {}", e)))
+                                        .expect("Unable to create Bad Request response due to unable to read body parameter OAuthTokenRequest")),
+                }
             },
 
             // UpdateExtension - PUT /v1/extensions/{extensionId}
