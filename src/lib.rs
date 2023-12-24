@@ -5,6 +5,7 @@
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
+use authentication::{LoginResponse, RequestTokenResponse, OpenIdConfigurationResponse, JwksResponse, AuthenticationResponse};
 use authress::models::*;
 use futures::Stream;
 use log::*;
@@ -494,34 +495,6 @@ pub enum GetExtensionsResponse {
     ,
     /// Forbidden. The user doesn't have permission to fetch account extensions, but has other account permissions.
     Forbidden
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[must_use]
-pub enum LoginResponse {
-    /// Success.
-    Success
-    (String)
-    ,
-    /// Bad Request. There are one or more issues with the request that prevent the service from returning a valid token
-    BadRequest
-    ,
-    /// Unauthorized. The credentials and temporary security token provided in the request is invalid
-    Unauthorized
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[must_use]
-pub enum RequestTokenResponse {
-    /// Success. The credentials provided are valid and token has been created.
-    Success
-    (String)
-    ,
-    /// Bad Request. There are one or more issues with the request that prevent the service from returning a valid token
-    BadRequest
-    ,
-    /// Unauthorized. The credentials and temporary security token provided in the request is invalid
-    Unauthorized
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -1237,6 +1210,23 @@ pub trait Api<C: Send + Sync> {
         code_challenge_method: Option<String>,
         context: &C) -> Result<LoginResponse, ApiError>;
 
+    /// Authenticate
+    async fn authenticate(
+        &self,
+        host_value: &str,
+        context: &C) -> Result<AuthenticationResponse, ApiError>;
+    
+    /// Open ID Configuration
+    async fn open_id_configuration(
+        &self,
+        host_value: &str,
+        context: &C) -> Result<OpenIdConfigurationResponse, ApiError>;
+
+    /// Jwks
+    async fn jwks(
+        &self,
+        context: &C) -> Result<JwksResponse, ApiError>;
+    
     /// OAuth Token
     async fn request_token(
         &self,
@@ -2619,6 +2609,9 @@ pub use self::server::Service;
 
 #[cfg(feature = "server")]
 pub mod context;
+
+#[cfg(feature = "server")]
+pub mod authentication;
 
 #[cfg(any(feature = "server"))]
 pub(crate) mod header;

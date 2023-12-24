@@ -5,6 +5,7 @@
 #![allow(unused_imports)]
 
 use async_trait::async_trait;
+use authress_local::authentication::{RequestTokenResponse, LoginResponse, AuthenticationResponse, OpenIdConfigurationResponse, JwksResponse};
 use futures::{future, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use hyper::server::conn::Http;
 use hyper::service::Service;
@@ -107,14 +108,14 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 {
     /// Create resource Claim
     async fn create_claim(&self, claim_request: ClaimRequest, context: &C) -> Result<CreateClaimResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_claim({:?}) - X-Span-ID: {:?}", claim_request, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create user invite
     async fn create_invite(&self, invite: Invite, context: &C) -> Result<CreateInviteResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_invite({:?}) - X-Span-ID: {:?}", invite, context.get().0.clone());
         
         return Ok(CreateInviteResponse::Success("{}".to_string()));
@@ -122,20 +123,20 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Delete invite
     async fn delete_invite(&self, invite_id: String,context: &C) -> Result<DeleteInviteResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_invite(\"{}\") - X-Span-ID: {:?}", invite_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
     /// Accept invite
     async fn respond_to_invite(&self, invite_id: String,context: &C) -> Result<RespondToInviteResponse, ApiError> {
-        let context = context.clone();
+        
         info!("respond_to_invite(\"{}\") - X-Span-ID: {:?}", invite_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create access record
     async fn create_record(&self, access_record: AccessRecord, context: &C) -> Result<CreateRecordResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_record({:?}) - X-Span-ID: {:?}", access_record, context.get().0.clone());
 
         let record_id = access_record.record_id.unwrap_or(nanoid::nanoid!());
@@ -161,7 +162,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Retrieve access record
     async fn get_record(&self, record_id: String,context: &C) -> Result<GetRecordResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_record(\"{}\") - X-Span-ID: {:?}", record_id, context.get().0.clone());
         
         let database = self.databases.records_db.lock().unwrap();
@@ -178,7 +179,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// List access records
     async fn get_records(&self, limit: Option<i32>, cursor: Option<String>, filter: Option<String>, status: Option<String>, context: &C) -> Result<GetRecordsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_records({:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, filter, status, context.get().0.clone());
         
         let database = self.databases.records_db.lock().unwrap();
@@ -188,7 +189,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Update access record
     async fn update_record(&self, record_id: String, access_record: AccessRecord, if_unmodified_since: Option<String>, context: &C) -> Result<UpdateRecordResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_record(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}", record_id, access_record, if_unmodified_since, context.get().0.clone());
         
         let mut database = self.databases.records_db.lock().unwrap();
@@ -203,7 +204,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Deletes access record
     async fn delete_record(&self, record_id: String,context: &C) -> Result<DeleteRecordResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_record(\"{}\") - X-Span-ID: {:?}", record_id, context.get().0.clone());
         
         let mut database = self.databases.records_db.lock().unwrap();
@@ -217,35 +218,35 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Create access request
     async fn create_request(&self, access_request: AccessRequest,context: &C) -> Result<CreateRequestResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_request({:?}) - X-Span-ID: {:?}", access_request, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Deletes access request
     async fn delete_request(&self, request_id: String,context: &C) -> Result<DeleteRequestResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_request(\"{}\") - X-Span-ID: {:?}", request_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve access request
     async fn get_request(&self, request_id: String,context: &C) -> Result<GetRequestResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_request(\"{}\") - X-Span-ID: {:?}", request_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List access requests
     async fn get_requests(&self, limit: Option<i32>,cursor: Option<String>, status: Option<String>, context: &C) -> Result<GetRequestsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_requests({:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, status, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Approve or deny access request
     async fn respond_to_access_request(&self, request_id: String,access_request_response: AccessRequestResponse, context: &C) -> Result<RespondToAccessRequestResponse, ApiError> {
-        let context = context.clone();
+        
         info!("respond_to_access_request(\"{}\", {:?}) - X-Span-ID: {:?}", request_id, access_request_response, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
@@ -253,28 +254,28 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /* ACCOUNT MANAGER */
     /// Retrieve account information
     async fn get_account(&self, account_id: String,context: &C) -> Result<GetAccountResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_account(\"{}\") - X-Span-ID: {:?}", account_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List user Authress accounts
     async fn get_accounts(&self, earliest_cache_time: Option<chrono::DateTime::<chrono::Utc>>,context: &C) -> Result<GetAccountsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_accounts({:?}) - X-Span-ID: {:?}", earliest_cache_time, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Link external provider
     async fn delegate_authentication(&self, identity_request: IdentityRequest,context: &C) -> Result<DelegateAuthenticationResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delegate_authentication({:?}) - X-Span-ID: {:?}", identity_request, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List linked external providers
     async fn get_account_identities(&self, context: &C) -> Result<GetAccountIdentitiesResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_account_identities() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
@@ -285,143 +286,174 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Create tenant
     async fn create_tenant(&self, tenant: Tenant,context: &C) -> Result<CreateTenantResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_tenant({:?}) - X-Span-ID: {:?}", tenant, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete tenant
     async fn delete_tenant(&self, tenant_id: String,context: &C) -> Result<DeleteTenantResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_tenant(\"{}\") - X-Span-ID: {:?}", tenant_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve tenant
     async fn get_tenant(&self, tenant_id: String,context: &C) -> Result<GetTenantResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_tenant(\"{}\") - X-Span-ID: {:?}", tenant_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List tenants
     async fn get_tenants(&self, context: &C) -> Result<GetTenantsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_tenants() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update tenant
     async fn update_tenant(&self, tenant_id: String,tenant: Tenant, context: &C) -> Result<UpdateTenantResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_tenant(\"{}\", {:?}) - X-Span-ID: {:?}", tenant_id, tenant, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create SSO connection
     async fn create_connection(&self, connection: Connection,context: &C) -> Result<CreateConnectionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_connection({:?}) - X-Span-ID: {:?}", connection, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete SSO connection
     async fn delete_connection(&self, connection_id: String,context: &C) -> Result<DeleteConnectionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_connection(\"{}\") - X-Span-ID: {:?}", connection_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve SSO connection
     async fn get_connection(&self, connection_id: String,context: &C) -> Result<GetConnectionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_connection(\"{}\") - X-Span-ID: {:?}", connection_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve user connection credentials
     async fn get_connection_credentials(&self, connection_id: String,user_id: String, context: &C) -> Result<GetConnectionCredentialsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_connection_credentials(\"{}\", {:?}) - X-Span-ID: {:?}", connection_id, user_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List SSO connections
     async fn get_connections(&self, context: &C) -> Result<GetConnectionsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_connections() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update SSO connection
     async fn update_connection(&self, connection_id: String,connection: Connection, context: &C) -> Result<UpdateConnectionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_connection(\"{}\", {:?}) - X-Span-ID: {:?}", connection_id, connection, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Create extension
     async fn create_extension(&self, extension: Extension,context: &C) -> Result<CreateExtensionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_extension({:?}) - X-Span-ID: {:?}", extension, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete extension
     async fn delete_extension(&self, extension_id: String,context: &C) -> Result<DeleteExtensionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_extension(\"{}\") - X-Span-ID: {:?}", extension_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve extension
     async fn get_extension(&self, extension_id: String,context: &C) -> Result<GetExtensionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_extension(\"{}\") - X-Span-ID: {:?}", extension_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List extensions
     async fn get_extensions(&self, context: &C) -> Result<GetExtensionsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_extensions() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update extension
     async fn update_extension(&self, extension_id: String,extension: Extension, context: &C) -> Result<UpdateExtensionResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_extension(\"{}\", {:?}) - X-Span-ID: {:?}", extension_id, extension, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Log user into third-party application
     async fn delegate_user_login(&self, application_id: String,user_id: String, context: &C) -> Result<DelegateUserLoginResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delegate_user_login(\"{}\", {:?}) - X-Span-ID: {:?}", application_id, user_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
+    /* ********************************* */
+    /* Authentication */
+    /* ********************************* */
+
+    /// Authenticate
+    async fn authenticate(&self, host: &str, context: &C) -> Result<AuthenticationResponse, ApiError> {
+        let signature_key_db = self.databases.signature_key.lock().unwrap();
+        
+        let result = signature_key_db.create_token(host);
+        info!("authenticate({host})- X-Span-ID: {:?}", context.get().0.clone());
+        return Ok(AuthenticationResponse::Success(serde_json::to_string(&result).unwrap()));
+    }
+
+    /// Get OpenID Configuration
+    async fn open_id_configuration(&self, host: &str, context: &C) -> Result<OpenIdConfigurationResponse, ApiError> {
+        let signature_key_db = self.databases.signature_key.lock().unwrap();
+        
+        let result = signature_key_db.get_openid_configuration(host);
+        info!("open_id_configuration({host})- X-Span-ID: {:?}", context.get().0.clone());
+        return Ok(OpenIdConfigurationResponse::Success(serde_json::to_string(&result).unwrap()));
+    }
+
+    /// Get OpenID Configuration JWKS
+    async fn jwks(&self, context: &C) -> Result<JwksResponse, ApiError> {
+        let signature_key_db = self.databases.signature_key.lock().unwrap();
+        
+        let result = signature_key_db.get_jwks();
+        info!("jwks()- X-Span-ID: {:?}", context.get().0.clone());
+        return Ok(JwksResponse::Success(serde_json::to_string(&result).unwrap()));
+    }
+
     /// OAuth Authorize
     async fn login(&self, client_id: String,code_challenge: String, redirect_uri: String, code_challenge_method: Option<String>, context: &C) -> Result<LoginResponse, ApiError> {
-        let context = context.clone();
+        
         info!("login(\"{}\", \"{}\", \"{}\", {:?}) - X-Span-ID: {:?}", client_id, code_challenge, redirect_uri, code_challenge_method, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// OAuth Token
     async fn request_token(&self, o_auth_token_request: OAuthTokenRequest,context: &C) -> Result<RequestTokenResponse, ApiError> {
-        let context = context.clone();
+        
         info!("request_token({:?}) - X-Span-ID: {:?}", o_auth_token_request, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /* ********************************* */
-
     /* GROUP MANAGEMENT */
+    /* ********************************* */
 
     async fn create_group(&self, group: Group, context: &C) -> Result<CreateGroupResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_group({:?}) - X-Span-ID: {:?}", group, context.get().0.clone());
     
         let group_id_option = group.group_id.clone();
@@ -451,7 +483,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// Retrieve group
     async fn get_group(&self, group_id: String,context: &C) -> Result<GetGroupResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_group(\"{}\") - X-Span-ID: {:?}", group_id, context.get().0.clone());
         
         let database = self.databases.groups_db.lock().unwrap();
@@ -465,7 +497,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// List groups
     async fn get_groups(&self, limit: Option<i32>, cursor: Option<String>, filter: Option<String>, context: &C) -> Result<GetGroupsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_groups({:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, filter, context.get().0.clone());
         
         let database = self.databases.groups_db.lock().unwrap();
@@ -475,7 +507,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// Update group
     async fn update_group(&self, group_id: String, group: Group, context: &C) -> Result<UpdateGroupResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_group(\"{}\", {:?}) - X-Span-ID: {:?}", group_id, group, context.get().0.clone());
         
         let mut database = self.databases.groups_db.lock().unwrap();
@@ -490,7 +522,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// Deletes group
     async fn delete_group(&self, group_id: String,context: &C) -> Result<DeleteGroupResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_record(\"{}\") - X-Span-ID: {:?}", group_id, context.get().0.clone());
         
         let mut database = self.databases.groups_db.lock().unwrap();
@@ -504,28 +536,28 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Retrieve resource configuration
     async fn get_permissioned_resource(&self, resource_uri: String,context: &C) -> Result<GetPermissionedResourceResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_permissioned_resource(\"{}\") - X-Span-ID: {:?}", resource_uri, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List all resource configurations
     async fn get_permissioned_resources(&self, context: &C) -> Result<GetPermissionedResourcesResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_permissioned_resources() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List users with resource access
     async fn get_resource_users(&self, resource_uri: String,limit: Option<i32>, cursor: Option<String>, context: &C) -> Result<GetResourceUsersResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_resource_users(\"{}\", {:?}, {:?}) - X-Span-ID: {:?}", resource_uri, limit, cursor, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update resource configuration
     async fn update_permissioned_resource(&self, resource_uri: String,permissioned_resource: PermissionedResource, context: &C) -> Result<UpdatePermissionedResourceResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_permissioned_resource(\"{}\", {:?}) - X-Span-ID: {:?}", resource_uri, permissioned_resource, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
@@ -537,7 +569,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     // Create role
     async fn create_role(&self, role: Role, context: &C) -> Result<CreateRoleResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_role({:?}) - X-Span-ID: {:?}", role, context.get().0.clone());
     
         if !role.role_id.starts_with("ro_") {
@@ -559,7 +591,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// Retrieve role
     async fn get_role(&self, role_id: String,context: &C) -> Result<GetRoleResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_role(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
         
         let database = self.databases.roles_db.lock().unwrap();
@@ -573,7 +605,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// List roles
     async fn get_roles(&self, context: &C) -> Result<GetRolesResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_roles() - X-Span-ID: {:?}", context.get().0.clone());
         
         let database = self.databases.roles_db.lock().unwrap();
@@ -583,7 +615,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// Update role
     async fn update_role(&self, role_id: String, role: Role, context: &C) -> Result<UpdateRoleResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_role(\"{}\", {:?}) - X-Span-ID: {:?}", role_id, role, context.get().0.clone());
         
         let mut database = self.databases.roles_db.lock().unwrap();
@@ -598,7 +630,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     
     /// Deletes role
     async fn delete_role(&self, role_id: String,context: &C) -> Result<DeleteRoleResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_record(\"{}\") - X-Span-ID: {:?}", role_id, context.get().0.clone());
         
         let mut database = self.databases.roles_db.lock().unwrap();
@@ -612,49 +644,49 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Create service client
     async fn create_client(&self, client: Client,context: &C) -> Result<CreateClientResponse, ApiError> {
-        let context = context.clone();
+        
         info!("create_client({:?}) - X-Span-ID: {:?}", client, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete service client access key
     async fn delete_access_key(&self, client_id: String,key_id: String, context: &C) -> Result<DeleteAccessKeyResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_access_key(\"{}\", \"{}\") - X-Span-ID: {:?}", client_id, key_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Delete service client
     async fn delete_client(&self, client_id: String,context: &C) -> Result<DeleteClientResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_client(\"{}\") - X-Span-ID: {:?}", client_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve service client
     async fn get_client(&self, client_id: String,context: &C) -> Result<GetClientResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_client(\"{}\") - X-Span-ID: {:?}", client_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List service clients
     async fn get_clients(&self, limit: Option<i32>,cursor: Option<String>, context: &C) -> Result<GetClientsResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_clients({:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Generate service client access key
     async fn request_access_key(&self, client_id: String,context: &C) -> Result<RequestAccessKeyResponse, ApiError> {
-        let context = context.clone();
+        
         info!("request_access_key(\"{}\") - X-Span-ID: {:?}", client_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Update service client
     async fn update_client(&self, client_id: String,client: Client, context: &C) -> Result<UpdateClientResponse, ApiError> {
-        let context = context.clone();
+        
         info!("update_client(\"{}\", {:?}) - X-Span-ID: {:?}", client_id, client, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
@@ -665,7 +697,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Verify user authorization
     async fn authorize_user(&self, user_id: String,resource_uri: String, permission: String, context: &C) -> Result<AuthorizeUserResponse, ApiError> {
-        let context = context.clone();
+        
         info!("authorize_user({:?}, \"{}\", {:?}) - X-Span-ID: {:?}", user_id, resource_uri, permission, context.get().0.clone());
         
         return Ok(AuthorizeUserResponse::Success);
@@ -673,7 +705,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Get user permissions for resource
     async fn get_user_permissions_for_resource(&self, user_id: String, resource_uri: String, context: &C) -> Result<GetUserPermissionsForResourceResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_user_permissions_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
         
         let permission_collection = PermissionCollection {
@@ -687,7 +719,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     async fn get_user_resources(&self, user_id: String, resource_uri: Option<String>, collection_configuration: Option<String>, permissions: Option<String>, limit: Option<i32>, cursor: Option<String>,
         context: &C) -> Result<GetUserResourcesResponse, ApiError> {
 
-        let context = context.clone();
+        
         info!("get_user_resources({:?}, {:?}, {:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", user_id, resource_uri, collection_configuration, permissions, limit, cursor, context.get().0.clone());
         
         // let database = self.databases.records_db.lock().unwrap();
@@ -715,7 +747,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Get user roles for resource
     async fn get_user_roles_for_resource(&self, user_id: String, resource_uri: String, context: &C) -> Result<GetUserRolesForResourceResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_user_roles_for_resource({:?}, \"{}\") - X-Span-ID: {:?}", user_id, resource_uri, context.get().0.clone());
         
         let database = self.databases.roles_db.lock().unwrap();
@@ -734,21 +766,21 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
     /// Delete a user
     async fn delete_user(&self, user_id: String,context: &C) -> Result<DeleteUserResponse, ApiError> {
-        let context = context.clone();
+        
         info!("delete_user({:?}) - X-Span-ID: {:?}", user_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// Retrieve a user
     async fn get_user(&self, user_id: String,context: &C) -> Result<GetUserResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_user({:?}) - X-Span-ID: {:?}", user_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
 
     /// List users
     async fn get_users(&self, limit: Option<i32>,cursor: Option<String>, filter: Option<String>, tenant_id: Option<String>, context: &C) -> Result<GetUsersResponse, ApiError> {
-        let context = context.clone();
+        
         info!("get_users({:?}, {:?}, {:?}, {:?}) - X-Span-ID: {:?}", limit, cursor, filter, tenant_id, context.get().0.clone());
         Err(ApiError::NotImplementedError("This endpoint is not yet implemented".into()))
     }
