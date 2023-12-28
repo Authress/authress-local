@@ -10,7 +10,9 @@ pub struct JwkList {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OpenIdConfiguration {
-    pub jwk_uri: String
+    pub jwks_uri: String,
+    pub token_endpoint: String,
+    pub authorization_endpoint: String
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -52,7 +54,9 @@ impl AuthenticationController {
 
     pub fn get_openid_configuration(&self, host: &str) -> OpenIdConfiguration {
         return OpenIdConfiguration {
-            jwk_uri: format!("https//{host}/.well-known/openid-configuration/jwks")
+            jwks_uri: format!("http://{host}/.well-known/openid-configuration/jwks"),
+            authorization_endpoint: format!("http://{host}"),
+            token_endpoint: format!("http://{host}/api/authentication/oauth/tokens"),
         };
     }
 
