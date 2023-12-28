@@ -3369,7 +3369,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                     *response.body_mut() = Body::from(body);
                 }
 
-                response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap().to_owned());
+                response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap_or(&HeaderValue::from_static("*")).to_owned());
                 Ok(response)
             },
 
@@ -3449,8 +3449,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             Some(authentication_request) => authentication_request,
                             None => return Ok(Response::builder()
                                                 .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from("Missing required body parameter OAuthTokenRequest"))
-                                                .expect("Unable to create Bad Request response for missing body parameter OAuthTokenRequest")),
+                                                .body(Body::from("Missing required body parameter requestUrl"))
+                                                .expect("Unable to create Bad Request response for missing body parameter requestUrl")),
                         };
 
                         let result = api_impl.authenticate(host_value, authentication_request, &context).await;
@@ -3492,7 +3492,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             }
                         }
 
-                        response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap().to_owned());
+                        response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap_or(&HeaderValue::from_static("*")).to_owned());
                         Ok(response)
                     },
                     Err(e) => Ok(Response::builder()
@@ -3578,7 +3578,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             }
                         }
 
-                        response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap().to_owned());
+                        response.headers_mut().insert(HeaderName::from_static("access-control-allow-origin"), origin_header.unwrap_or(&HeaderValue::from_static("*")).to_owned());
                         return Ok(response);
                     },
                     Err(e) => Ok(Response::builder()
@@ -6929,7 +6929,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             // Fallback All Options 
             hyper::Method::OPTIONS => {
                 return Ok(Response::builder()
-                    .header("access-control-allow-origin", (&origin_header.unwrap()).to_str().unwrap())
+                    .header("access-control-allow-origin", (&origin_header.unwrap_or(&HeaderValue::from_static("*"))).to_str().unwrap())
                     .header("cache-control", "public, max-age=864000")
                     .header("access-control-allow-headers", "content-type,x-amz-date,authorization,x-api-key,x-powered-by,if-unmodified-since,origin,referer,accept,accept-language,accept-encoding,user-agent,content-length,cache-control,pragma,sec-fetch-dest,sec-fetch-mode,sec-fetch-site,sec-gpc")
                     .header("access-control-allow-methods", "delete,get,head,options,patch,post,put")
