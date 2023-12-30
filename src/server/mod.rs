@@ -3404,19 +3404,22 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             <String as std::str::FromStr>::from_str
                                 (&redirect_uri);
                         match redirect_uri {
-                            Ok(redirect_uri) => Some(redirect_uri),
+                            Ok(redirect_uri) => redirect_uri,
                             Err(e) => return Ok(Response::builder()
                                 .status(StatusCode::BAD_REQUEST)
                                 .body(Body::from(format!("Couldn't parse query parameter redirect_uri - doesn't match schema: {}", e)))
                                 .expect("Unable to create Bad Request response for invalid query parameter redirect_uri")),
                         }
                     },
-                    None => None,
+                    None => return Ok(Response::builder()
+                        .status(StatusCode::BAD_REQUEST)
+                        .body(Body::from(format!("Required query parameter redirect_uri not specified.")))
+                        .expect("Unable to create Bad Request response for invalid query parameter redirect_uri"))
                 };
 
                 return Ok(Response::builder()
                     .status(StatusCode::TEMPORARY_REDIRECT)
-                    .header("location", redirect_uri.unwrap())
+                    .header("location", redirect_uri)
                     .body(Body::from(""))
                     .expect("Unable to create redirect for logout."));
             },
