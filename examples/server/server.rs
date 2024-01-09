@@ -158,8 +158,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 
         let result = database.get(&record_id);
         return Ok(CreateRecordResponse::Success {
-            body: serde_json::to_string(&*result.unwrap()).unwrap(),
-            last_modified: Some(chrono::offset::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true))
+            body: serde_json::to_string(&*result.unwrap()).unwrap()
         });
     }
 
@@ -172,8 +171,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         let result = database.get(&record_id);
         if let Some(existing_access_record) = result {
             return Ok(GetRecordResponse::Success {
-                body: serde_json::to_string(&*existing_access_record).unwrap(),
-                last_modified: Some(chrono::offset::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true))
+                body: serde_json::to_string(&*existing_access_record).unwrap()
             });
         }
 

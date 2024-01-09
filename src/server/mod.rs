@@ -709,28 +709,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                CreateRecordResponse::Success
-                                                    {
-                                                        body,
-                                                        last_modified
-                                                    }
+                                                CreateRecordResponse::Success{body}
                                                 => {
-                                                    if let Some(last_modified) = last_modified {
-                                                    let last_modified = match header::IntoHeaderValue(last_modified).try_into() {
-                                                        Ok(val) => val,
-                                                        Err(e) => {
-                                                            return Ok(Response::builder()
-                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling last_modified header - {}", e)))
-                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
-                                                        }
-                                                    };
-
-                                                    response.headers_mut().insert(
-                                                        HeaderName::from_static("last-modified"),
-                                                        last_modified
-                                                    );
-                                                    }
                                                     *response.status_mut() = StatusCode::from_u16(201).expect("Unable to turn 201 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -1162,25 +1142,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 GetRecordResponse::Success
                                                     {
                                                         body,
-                                                        last_modified
                                                     }
                                                 => {
-                                                    if let Some(last_modified) = last_modified {
-                                                    let last_modified = match header::IntoHeaderValue(last_modified).try_into() {
-                                                        Ok(val) => val,
-                                                        Err(e) => {
-                                                            return Ok(Response::builder()
-                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling last_modified header - {}", e)))
-                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
-                                                        }
-                                                    };
-
-                                                    response.headers_mut().insert(
-                                                        HeaderName::from_static("last-modified"),
-                                                        last_modified
-                                                    );
-                                                    }
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -1883,27 +1846,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
-                                                UpdateRecordResponse::PreconditionFailed
-                                                    {
-                                                        last_modified
-                                                    }
-                                                => {
-                                                    if let Some(last_modified) = last_modified {
-                                                    let last_modified = match header::IntoHeaderValue(last_modified).try_into() {
-                                                        Ok(val) => val,
-                                                        Err(e) => {
-                                                            return Ok(Response::builder()
-                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling last_modified header - {}", e)))
-                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
-                                                        }
-                                                    };
-
-                                                    response.headers_mut().insert(
-                                                        HeaderName::from_static("last-modified"),
-                                                        last_modified
-                                                    );
-                                                    }
+                                                UpdateRecordResponse::PreconditionFailed => {
                                                     *response.status_mut() = StatusCode::from_u16(412).expect("Unable to turn 412 into a StatusCode");
                                                 },
                                                 UpdateRecordResponse::TheSizeOfTheRecordIsLargerThanAllowed
@@ -3472,9 +3415,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                         match result {
                             Ok(rsp) => match rsp {
-                                AuthenticationResponse::Success
-                                    (body)
-                                => {
+                                AuthenticationResponse::Success(body) => {
                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                     response.headers_mut().insert(
                                         CONTENT_TYPE,

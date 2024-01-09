@@ -64,8 +64,7 @@ pub enum CreateRecordResponse {
     /// Success. Access record created
     Success
     {
-        body: String,
-        last_modified: Option<String>
+        body: String
     },
     /// Unauthorized. The request JWT found in the Authorization header is no longer valid.
     Unauthorized,
@@ -148,11 +147,7 @@ pub enum GetRecordResponse {
     /// Success.
     Success
     {
-        body: String,
-        last_modified:
-        Option<
-        String
-        >
+        body: String
     }
     ,
     /// Unauthorized. The request JWT found in the Authorization header is no longer valid.
@@ -261,12 +256,6 @@ pub enum UpdateRecordResponse {
     ,
     /// Precondition failed. Usually the result of a concurrent update to the access record. Get the latest version and retry again.
     PreconditionFailed
-    {
-        last_modified:
-        Option<
-        String
-        >
-    }
     ,
     /// The size of the record is larger than allowed. Recommended action is to create another record and retry the updates.
     TheSizeOfTheRecordIsLargerThanAllowed
