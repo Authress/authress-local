@@ -61,7 +61,7 @@ pub enum AuthenticationResponse {
 #[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct AuthenticationRequest {
     #[serde(rename = "redirectUrl")]
-    pub redirect_url: String,
+    pub redirect_url: Option<String>,
     // /// The secret associated with the client that authorizes the generation of token it's behalf. (Either the `client_secret` or the `code_verifier` is required)
     // #[serde(rename = "client_secret", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     // pub client_secret: Option<Option<String>>,
@@ -80,19 +80,4 @@ pub struct AuthenticationRequest {
     // /// Enables additional configuration of the grant_type. In the case of user password grant_type, set this to **signup**, to enable the creation of users. Set this to **update**, force update the password associated with the user.
     // #[serde(rename = "type", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     // pub r#type: Option<Option<Type>>,
-}
-
-impl AuthenticationRequest {
-    pub fn new(redirect_url: String) -> AuthenticationRequest {
-        AuthenticationRequest {
-            redirect_url,
-            // client_id,
-            // client_secret: None,
-            // code_verifier: None,
-            // grant_type: None,
-            // username: None,
-            // password: None,
-            // r#type: None,
-        }
-    }
 }

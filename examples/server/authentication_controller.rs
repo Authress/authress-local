@@ -15,14 +15,17 @@ pub struct OpenIdConfiguration {
     pub authorization_endpoint: String
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct StartAuthenticationResponse {
-    #[serde(rename = "authenticationUrl")]
-    pub authentication_url: String,
+    #[serde(rename = "authenticationUrl", skip_serializing_if="Option::is_none")]
+    pub authentication_url: Option<String>,
 
-    #[serde(rename = "authenticationRequestId")]
-    pub authentication_request_id: String
+    #[serde(rename = "authenticationRequestId", skip_serializing_if="Option::is_none")]
+    pub authentication_request_id: Option<String>,
+
+    #[serde(rename = "accessToken", skip_serializing_if="Option::is_none")]
+    pub access_token: Option<String>
 }
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -35,13 +38,23 @@ impl AuthenticationController {
         let access_token = signature_key.create_token(host);
         let id_token = signature_key.create_id_token(host);
 
-        let url = Url::parse_with_params(&authentication_request.redirect_url,
-            &[("access_token", &access_token), ("id_token", &id_token), ("nonce", &request_id.to_string())]
-        ).unwrap();
+        if let Some(redirect_url) = authentication_request.redirect_url {
+            let parsed_url = Url::parse_with_params(&redirect_url,
+                &[("access_token", &access_token), ("id_token", &id_token), ("nonce", &request_id.to_string())]
+            );
+            if let Ok(url) = parsed_url {
+                return StartAuthenticationResponse {
+                    authentication_request_id: Some(request_id.to_string()),
+                    authentication_url: Some(url.to_string()),
+                    access_token: Some(access_token)
+                }
+            }
+        }
 
         return StartAuthenticationResponse {
-            authentication_request_id: request_id.to_string(),
-            authentication_url: url.to_string()
+            authentication_request_id: None,
+            authentication_url: None,
+            access_token: Some(access_token)
         }
     }
 
