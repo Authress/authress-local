@@ -3391,15 +3391,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         } else {
                             None
                         };
-                        let authentication_request = match authentication_request {
-                            Some(authentication_request) => authentication_request,
-                            None => return Ok(Response::builder()
-                                                .status(StatusCode::BAD_REQUEST)
-                                                .body(Body::from("Missing required body parameter requestUrl"))
-                                                .expect("Unable to create Bad Request response for missing body parameter requestUrl")),
-                        };
 
-                        let result = api_impl.authenticate(host_value, authentication_request, &context).await;
+                        let result = api_impl.authenticate(host_value, authentication_request.unwrap_or_default(), &context).await;
                         let mut response = Response::new(Body::empty());
                         response.headers_mut().insert(
                                     HeaderName::from_static("x-span-id"),
