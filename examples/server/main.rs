@@ -31,6 +31,8 @@ async fn main() {
         server::create(addr, &DATABASES).await;
     });
 
-    info!("Authress Local is now running on localhost:8888");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+    info!("Authress Local (Version: {}) is now running on localhost:8888", VERSION);
     task.await.unwrap();
 }

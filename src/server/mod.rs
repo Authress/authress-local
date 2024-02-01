@@ -6883,7 +6883,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                     .expect("Unable to create OPTIONS response"));
             },
 
-            z if path.matched(paths::ID_) => method_not_allowed(),
+            _ if path.matched(paths::ID_) => method_not_allowed(),
             _ if path.matched(paths::ID_API_AUTHENTICATION_OAUTH_TOKENS) => method_not_allowed(),
             _ if path.matched(paths::ID_V1_ACCOUNTS) => method_not_allowed(),
             _ if path.matched(paths::ID_V1_ACCOUNTS_ACCOUNTID) => method_not_allowed(),
