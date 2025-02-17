@@ -1,0 +1,11 @@
+# Run `docker compose -f docker-compose-example.yml up`
+services:
+  authress:
+    image: ghcr.io/authress/authress-local:latest
+    ports:
+      - "8888:8888"  # Using 8890 externally to avoid conflict with collector
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api/authentication"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
