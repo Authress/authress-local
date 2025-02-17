@@ -91,11 +91,11 @@ use crate::{Api,
      GetUsersResponse, ApiError
 };
 
-pub const IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING: &str = "
+pub const IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE: &str = "
 ********************************************************************************
 ********************************************************************************
 
-Implementation not yet available for this endpoint. If you are interested in using it please file a ticket at https://github.com/Authress/authress-local/issues.
+Implementation not yet available for endpoint: {}. If you are interested in using it please file a ticket at https://github.com/Authress/authress-local/issues.
 
 ********************************************************************************
 ********************************************************************************\n";
@@ -353,7 +353,7 @@ impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
     }
 
     fn call(&mut self, target: Target) -> Self::Future {
-        futures::future::ok(Service::new(
+        future::ok(Service::new(
             self.api_impl.clone(),
         ))
     }
@@ -529,7 +529,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -630,7 +630,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -735,7 +735,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -840,7 +840,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -924,7 +924,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1002,7 +1002,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1080,7 +1080,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1167,7 +1167,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1299,7 +1299,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1384,7 +1384,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1498,7 +1498,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1621,7 +1621,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1712,7 +1712,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1856,7 +1856,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -1950,7 +1950,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2037,7 +2037,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2094,7 +2094,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2168,7 +2168,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2268,7 +2268,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2363,7 +2363,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2447,7 +2447,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2532,7 +2532,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2632,7 +2632,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2689,7 +2689,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2812,7 +2812,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2913,7 +2913,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -2997,7 +2997,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3082,7 +3082,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3139,7 +3139,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3282,7 +3282,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3420,7 +3420,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(ApiError::NotImplementedError(_)) => {
                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                             },
                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3506,7 +3506,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             },
                             Err(ApiError::NotImplementedError(_)) => {
                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                             },
                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3636,7 +3636,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3740,7 +3740,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3824,7 +3824,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -3909,7 +3909,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4023,7 +4023,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4146,7 +4146,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4233,7 +4233,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4286,7 +4286,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4402,7 +4402,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4518,7 +4518,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4622,7 +4622,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4706,7 +4706,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4791,7 +4791,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4848,7 +4848,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -4971,7 +4971,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5068,7 +5068,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5167,7 +5167,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5245,7 +5245,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5326,7 +5326,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5422,7 +5422,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5507,7 +5507,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5630,7 +5630,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5731,7 +5731,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5815,7 +5815,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5900,7 +5900,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -5957,7 +5957,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6080,7 +6080,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6194,7 +6194,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6290,7 +6290,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6460,7 +6460,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6556,7 +6556,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6634,7 +6634,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6719,7 +6719,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {
@@ -6851,7 +6851,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             },
                                             Err(ApiError::NotImplementedError(_)) => {
                                                 *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
-                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING);
+                                                *response.body_mut() = Body::from(IMPLEMENTATION_NOT_YET_AVAILABLE_ERROR_STRING_TEMPLATE.replace("{}", uri.path()));
                                             },
                                             // Application code returned an error. This should not happen, as the implementation should return a valid response.
                                             Err(ApiError::UnknownApiError(error_message)) => {

@@ -6,10 +6,11 @@
 
 ## Development
 
-### Upgrade rust
+### Upgrade rust and dependencies
 Make sure rust is the latest version
 ```sh
 rustup update
+sudo apt install libssl-dev
 ```
 
 ### Running the Rust Service locally
